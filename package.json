@@ -11,12 +11,14 @@
     "db:setup": "npx prisma db push && npx tsx prisma/seed.ts",
     "erp:sync": "node scripts/sync-from-erp.mjs",
     "db:studio": "npx prisma studio",
+    "deploy": "bash scripts/deploy.sh",
     "postinstall": "npx prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.0.0",
     "better-sqlite3": "^12.11.1",
     "next": "^15.0.0",
+    "pg": "^8.22.0",
     "pinyin": "^4.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

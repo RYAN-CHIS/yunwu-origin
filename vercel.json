@@ -4,8 +4,5 @@
   "installCommand": "npm install",
   "framework": "nextjs",
   "outputDirectory": ".next",
-  "regions": ["hkg1"],
-  "env": {
-    "DATABASE_URL": "file:./yunwu.db"
-  }
+  "regions": ["hkg1"]
 }

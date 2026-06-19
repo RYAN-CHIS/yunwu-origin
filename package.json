@@ -9,6 +9,7 @@
     "db:push": "npx prisma db push",
     "db:seed": "npx tsx prisma/seed.ts",
     "db:setup": "npx prisma db push && npx tsx prisma/seed.ts",
+    "erp:sync": "node scripts/sync-from-erp.mjs",
     "db:studio": "npx prisma studio",
     "postinstall": "npx prisma generate"
   },

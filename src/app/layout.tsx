@@ -32,8 +32,9 @@ function Navbar() {
     { href: '/', label: '首页' },
     { href: '/series/fuchu', label: '七序' },
     { href: '/products', label: '作品' },
-    { href: '/materials', label: '材料' },
-    { href: '/about', label: '品牌故事' },
+    { href: '/journal', label: '品牌志' },
+    { href: '/about', label: '关于允物' },
+    { href: '/contact', label: '联系允物' },
   ];
 
   return (
@@ -91,8 +92,10 @@ function Footer() {
             <div className="grid grid-cols-2 gap-2 text-sm opacity-70">
               <Link href="/series/fuchu" className="hover:text-yun-white transition-colors">七序体系</Link>
               <Link href="/products" className="hover:text-yun-white transition-colors">全部作品</Link>
+              <Link href="/journal" className="hover:text-yun-white transition-colors">品牌志</Link>
               <Link href="/materials" className="hover:text-yun-white transition-colors">东方材料</Link>
-              <Link href="/about" className="hover:text-yun-white transition-colors">品牌故事</Link>
+              <Link href="/about" className="hover:text-yun-white transition-colors">关于允物</Link>
+              <Link href="/contact" className="hover:text-yun-white transition-colors">联系允物</Link>
             </div>
           </div>
 

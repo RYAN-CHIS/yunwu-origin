@@ -3,11 +3,11 @@ import '@/styles/globals.css';
 
 // ── SEO Metadata ──
 export const metadata = {
-  title: '允物 Yunwu Origin｜东方器物与天然材质设计品牌',
+  title: '允物 ORIGIN｜东方器物与天然材质设计品牌',
   description:
     '允物是一家以东方文化为根基的器物品牌，通过七序世界观与天然材质作品，回应当代人的精神生活。让物归物，让心归心。',
   openGraph: {
-    title: '允物 Yunwu Origin｜东方器物与天然材质设计品牌',
+    title: '允物 ORIGIN｜东方器物与天然材质设计品牌',
     description: '以东方文化为根，以天然材质为骨，以器物回应当代人的精神生活。',
     type: 'website' as const,
     locale: 'zh_CN',
@@ -40,8 +40,7 @@ function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-yun-white/95 backdrop-blur-sm border-b border-yun">
       <div className="container-brand flex items-center justify-between h-16">
         <Link href="/" className="flex items-center gap-2">
-          <span className="font-display text-2xl tracking-wider text-yun-text">Yunwu</span>
-          <span className="text-sm text-yun-accent tracking-widest mt-1">允物</span>
+          <img src="/logo.png" alt="允物 Yunwu" className="h-8 w-auto" />
         </Link>
 
         <div className="hidden md:flex items-center gap-10">
@@ -77,8 +76,7 @@ function Footer() {
           {/* 品牌信息 */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <span className="font-display text-2xl tracking-wider text-yun-white">Yunwu</span>
-              <span className="text-sm text-yun-accent tracking-widest">允物</span>
+              <img src="/logo.png" alt="允物 Yunwu" className="h-8 w-auto" />
             </div>
             <p className="text-sm leading-relaxed opacity-70">
               让物归物，让心归心。

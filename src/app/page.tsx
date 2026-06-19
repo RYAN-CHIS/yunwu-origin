@@ -16,7 +16,7 @@ export default async function HomePage() {
       <section className="min-h-screen flex items-center justify-center relative pt-16">
         <div className="text-center px-6 max-w-3xl fade-in">
           <p className="font-display text-7xl md:text-9xl text-yun-accent/20 tracking-widest leading-none mb-6">
-            Yunwu
+            ORIGIN
           </p>
           <h1 className="text-3xl md:text-4xl font-light tracking-[0.15em] text-yun-text mb-4">
             允物

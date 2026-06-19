@@ -14,7 +14,9 @@
   },
   "dependencies": {
     "@prisma/client": "^6.0.0",
+    "better-sqlite3": "^12.11.1",
     "next": "^15.0.0",
+    "pinyin": "^4.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

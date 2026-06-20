@@ -16,14 +16,15 @@ export default async function AdminDashboard() {
   let recentProducts: { id: number; name: string; status: string; updatedAt: Date }[] = [];
 
   try {
-    const [productCount, categoryCount, materialCount, journalCount, leadCount] =
+    const [productCount, materialCount, journalCount, leadCount] =
       await Promise.all([
         prisma.product.count(),
-        prisma.objectCategory.count(),
         prisma.material.count(),
         prisma.journalPost.count(),
         prisma.contactLead.count(),
       ]);
+
+    const categoryCount = 6; // ObjectCategory 枚举值数量（BRACELET~SCHOLAR）
 
     stats = [
       { label: "作品总数", value: productCount, href: "/admin/products", color: "var(--yun-accent)" },

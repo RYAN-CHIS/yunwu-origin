@@ -70,8 +70,9 @@ export async function getSeries() {
 }
 
 export async function createSeries(data: {
-  name: string; slug: string; shortDesc: string; longDesc: string;
-  coverImage?: string; sortOrder: number; isActive: boolean;
+  name: string; slug: string; description: string;
+  shortDesc?: string; longDesc?: string;
+  coverImage?: string; sortOrder?: number; isActive?: boolean;
 }) {
   await requireAdmin();
   const s = await prisma.series.create({ data });
@@ -79,8 +80,9 @@ export async function createSeries(data: {
   return s;
 }
 
-export async function updateSeries(id: string, data: {
-  name?: string; slug?: string; shortDesc?: string; longDesc?: string;
+export async function updateSeries(id: number, data: {
+  name?: string; slug?: string; description?: string;
+  shortDesc?: string; longDesc?: string;
   coverImage?: string; sortOrder?: number; isActive?: boolean;
 }) {
   await requireAdmin();
@@ -90,7 +92,7 @@ export async function updateSeries(id: string, data: {
   return s;
 }
 
-export async function deleteSeries(id: string) {
+export async function deleteSeries(id: number) {
   await requireAdmin();
   await prisma.series.delete({ where: { id } });
   revalidatePath("/admin/series");
@@ -101,35 +103,17 @@ export async function deleteSeries(id: string) {
 // ═══════════════════════════════════════════════════════
 
 export async function getObjectCategories() {
-  await requireAdmin();
-  return prisma.objectCategory.findMany({ orderBy: { sortOrder: "asc" } });
+  // ObjectCategory 是 enum，直接返回枚举值
+  return [
+    { name: "串珠", slug: "bracelet", enumValue: "BRACELET" },
+    { name: "香器", slug: "incense", enumValue: "INCENSE" },
+    { name: "印章", slug: "seal",     enumValue: "SEAL" },
+    { name: "瓷器", slug: "ceramic",  enumValue: "CERAMIC" },
+    { name: "珐琅", slug: "enamel",   enumValue: "ENAMEL" },
+    { name: "文房", slug: "scholar",  enumValue: "SCHOLAR" },
+  ];
 }
 
-export async function createObjectCategory(data: {
-  name: string; slug: string; description?: string;
-  coverImage?: string; sortOrder: number;
-}) {
-  await requireAdmin();
-  const c = await prisma.objectCategory.create({ data });
-  revalidatePath("/admin/objects");
-  return c;
-}
-
-export async function updateObjectCategory(id: string, data: {
-  name?: string; slug?: string; description?: string;
-  coverImage?: string; sortOrder?: number;
-}) {
-  await requireAdmin();
-  const c = await prisma.objectCategory.update({ where: { id }, data });
-  revalidatePath("/admin/objects");
-  return c;
-}
-
-export async function deleteObjectCategory(id: string) {
-  await requireAdmin();
-  await prisma.objectCategory.delete({ where: { id } });
-  revalidatePath("/admin/objects");
-}
 
 // ═══════════════════════════════════════════════════════
 // Material CRUD（SUPER_ADMIN / ADMIN）
@@ -150,7 +134,7 @@ export async function createMaterial(data: {
   return m;
 }
 
-export async function updateMaterial(id: string, data: {
+export async function updateMaterial(id: number, data: {
   name?: string; alias?: string; type?: string; origin?: string;
   history?: string; features?: string; description?: string; image?: string;
 }) {
@@ -160,7 +144,7 @@ export async function updateMaterial(id: string, data: {
   return m;
 }
 
-export async function deleteMaterial(id: string) {
+export async function deleteMaterial(id: number) {
   await requireAdmin();
   await prisma.material.delete({ where: { id } });
   revalidatePath("/admin/materials");
@@ -175,7 +159,7 @@ export async function deleteMaterial(id: string) {
 export async function getProducts() {
   await requireAnyRole();
   return prisma.product.findMany({
-    include: { series: true, objectCategory: true },
+    include: { series: true },
     orderBy: { updatedAt: "desc" },
   });
 }
@@ -191,15 +175,21 @@ export async function getSeriesForSelect() {
 
 export async function getCategoriesForSelect() {
   await requireAnyRole();
-  return prisma.objectCategory.findMany({
-    select: { id: true, name: true },
-    orderBy: { sortOrder: "asc" },
-  });
+  // ObjectCategory 是 enum，直接返回枚举值
+  const categories = [
+    { enumValue: "BRACELET", name: "串珠" },
+    { enumValue: "INCENSE", name: "香器" },
+    { enumValue: "SEAL", name: "印章" },
+    { enumValue: "CERAMIC", name: "瓷器" },
+    { enumValue: "ENAMEL", name: "珐琅" },
+    { enumValue: "SCHOLAR", name: "文房" },
+  ];
+  return categories.map(c => ({ id: c.enumValue, name: c.name }));
 }
 
 export async function createProduct(data: {
-  sku: string; name: string; slug: string; seriesId: string;
-  objectCategoryId: string; theme?: string; story?: string; materials?: string;
+  sku: string; name: string; slug: string; seriesId: number;
+  object_category: any; theme?: string; story?: string; materials?: string;
   coverImage?: string; gallery?: string; costPrice?: number; salePrice?: number;
   status?: string;
 }) {
@@ -210,8 +200,8 @@ export async function createProduct(data: {
 }
 
 export async function updateProduct(id: number, data: {
-  sku?: string; name?: string; slug?: string; seriesId?: string;
-  objectCategoryId?: string; theme?: string; story?: string; materials?: string;
+  sku?: string; name?: string; slug?: string; seriesId?: number;
+  object_category?: any; theme?: string; story?: string; materials?: string;
   coverImage?: string; gallery?: string; costPrice?: number; salePrice?: number;
   status?: string;
 }) {

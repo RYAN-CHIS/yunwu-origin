@@ -6,16 +6,16 @@ import { useEffect, useState } from "react";
 import { getSeries, createSeries, updateSeries, deleteSeries } from "@/lib/actions/admin-actions";
 
 type Series = {
-  id: string; name: string; slug: string; shortDesc: string;
-  longDesc: string; coverImage: string | null;
+  id: number; name: string; slug: string; description: string;
+  shortDesc: string | null; longDesc: string | null; coverImage: string | null;
   sortOrder: number; isActive: boolean;
 };
 
 export default function AdminSeriesPage() {
   const [items, setItems] = useState<Series[]>([]);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [showNew, setShowNew] = useState(false);
-  const [form, setForm] = useState({ name: "", slug: "", shortDesc: "", longDesc: "", coverImage: "", sortOrder: 0, isActive: true });
+  const [form, setForm] = useState({ name: "", slug: "", description: "", shortDesc: "", longDesc: "", coverImage: "", sortOrder: 0, isActive: true });
   const [loading, setLoading] = useState(false);
 
   async function load() {
@@ -26,13 +26,13 @@ export default function AdminSeriesPage() {
   useEffect(() => { load(); }, []);
 
   function resetForm() {
-    setForm({ name: "", slug: "", shortDesc: "", longDesc: "", coverImage: "", sortOrder: items.length + 1, isActive: true });
+    setForm({ name: "", slug: "", description: "", shortDesc: "", longDesc: "", coverImage: "", sortOrder: items.length + 1, isActive: true });
     setEditingId(null);
     setShowNew(false);
   }
 
   function editItem(s: Series) {
-    setForm({ name: s.name, slug: s.slug, shortDesc: s.shortDesc, longDesc: s.longDesc, coverImage: s.coverImage || "", sortOrder: s.sortOrder, isActive: s.isActive });
+    setForm({ name: s.name, slug: s.slug, description: s.description ?? "", shortDesc: s.shortDesc ?? "", longDesc: s.longDesc ?? "", coverImage: s.coverImage ?? "", sortOrder: s.sortOrder, isActive: s.isActive });
     setEditingId(s.id);
     setShowNew(true);
   }
@@ -50,7 +50,7 @@ export default function AdminSeriesPage() {
     setLoading(false);
   }
 
-  async function handleDelete(id: string) {
+  async function handleDelete(id: number) {
     if (!confirm("确定删除？")) return;
     await deleteSeries(id);
     await load();

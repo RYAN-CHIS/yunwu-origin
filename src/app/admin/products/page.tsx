@@ -7,13 +7,12 @@ import { getProducts, createProduct, deleteProduct, getSeriesForSelect, getCateg
 
 type ProductItem = {
   id: number; sku: string; name: string; slug: string; status: string;
-  seriesId: string; objectCategoryId: string;
-  series: { id: string; name: string };
-  objectCategory: { id: string; name: string };
+  seriesId: number; object_category: string;
+  series: { id: number; name: string };
   theme: string; coverImage: string; salePrice: number;
   updatedAt: Date;
 };
-type SelectOption = { id: string; name: string };
+type SelectOption = { id: string | number; name: string };
 
 export default function AdminProductsPage() {
   const [items, setItems] = useState<ProductItem[]>([]);
@@ -21,7 +20,7 @@ export default function AdminProductsPage() {
   const [catOpts, setCatOpts] = useState<SelectOption[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
-    sku: "", name: "", slug: "", seriesId: "", objectCategoryId: "",
+    sku: "", name: "", slug: "", seriesId: 0, object_category: "",
     theme: "", story: "", materials: "", coverImage: "", costPrice: 0, salePrice: 0, status: "draft",
   });
   const [loading, setLoading] = useState(false);
@@ -33,7 +32,7 @@ export default function AdminProductsPage() {
   useEffect(() => { load(); }, []);
 
   function resetForm() {
-    setForm({ sku: "", name: "", slug: "", seriesId: seriesOpts[0]?.id || "", objectCategoryId: catOpts[0]?.id || "", theme: "", story: "", materials: "", coverImage: "", costPrice: 0, salePrice: 0, status: "draft" });
+    setForm({ sku: "", name: "", slug: "", seriesId: 0, object_category: "", theme: "", story: "", materials: "", coverImage: "", costPrice: 0, salePrice: 0, status: "draft" });
     setShowForm(false);
   }
 
@@ -84,7 +83,7 @@ export default function AdminProductsPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs mb-1" style={subStyle}>七序</label>
-              <select value={form.seriesId} onChange={(e) => setForm({ ...form, seriesId: e.target.value })}
+              <select value={form.seriesId} onChange={(e) => setForm({ ...form, seriesId: parseInt(e.target.value) || 0 })}
                 className="w-full px-3 py-1.5 border text-sm bg-white" style={lineStyle}>
                 <option value="">选择七序</option>
                 {seriesOpts.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -92,7 +91,7 @@ export default function AdminProductsPage() {
             </div>
             <div>
               <label className="block text-xs mb-1" style={subStyle}>器物分类</label>
-              <select value={form.objectCategoryId} onChange={(e) => setForm({ ...form, objectCategoryId: e.target.value })}
+              <select value={form.object_category} onChange={(e) => setForm({ ...form, object_category: e.target.value })}
                 className="w-full px-3 py-1.5 border text-sm bg-white" style={lineStyle}>
                 <option value="">选择分类</option>
                 {catOpts.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -155,7 +154,7 @@ export default function AdminProductsPage() {
                 }}>{p.status === "published" ? "已发布" : "草稿"}</span>
               </div>
               <p className="text-xs mt-1" style={subStyle}>
-                {p.sku} · {p.series?.name} · {p.objectCategory?.name}
+                {p.sku} · {p.series?.name} · {p.object_category}
               </p>
             </div>
             <button onClick={() => handleDelete(p.id)} className="px-3 py-1 text-xs border rounded shrink-0" style={{ borderColor: "#E24B4A", color: "#E24B4A" }}>删除</button>

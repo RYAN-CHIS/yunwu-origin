@@ -16,6 +16,9 @@ const PERMISSIONS: Record<string, string[]> = {
     "/admin/media",
     "/admin/seo",
     "/admin/leads",
+    "/admin/content",
+    "/admin/tags",
+    "/admin/audit",
     "/admin/settings",
   ],
   ADMIN: [
@@ -28,12 +31,17 @@ const PERMISSIONS: Record<string, string[]> = {
     "/admin/media",
     "/admin/seo",
     "/admin/leads",
+    "/admin/content",
+    "/admin/tags",
+    "/admin/audit",
   ],
   EDITOR: [
     "/admin",
     "/admin/journal",
     "/admin/media",
     "/admin/products",
+    "/admin/content",
+    "/admin/tags",
   ],
   OPERATOR: [
     "/admin",
@@ -52,11 +60,14 @@ const allNavItems = [
   ]},
   { label: "内容中心", items: [
     { label: "品牌志", href: "/admin/journal" },
+    { label: "页面内容", href: "/admin/content" },
+    { label: "标签系统", href: "/admin/tags" },
   ]},
   { label: "作品中心", href: "/admin/products" },
   { label: "图片资产库", href: "/admin/media" },
   { label: "潜在线索", href: "/admin/leads" },
   { label: "SEO 中心", href: "/admin/seo" },
+  { label: "审计日志", href: "/admin/audit" },
   { label: "系统设置", href: "/admin/settings" },
 ];
 

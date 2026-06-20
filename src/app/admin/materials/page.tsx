@@ -6,13 +6,13 @@ import { useEffect, useState } from "react";
 import { getMaterials, createMaterial, updateMaterial, deleteMaterial } from "@/lib/actions/admin-actions";
 
 type Mat = {
-  id: string; name: string; alias: string; type: string; origin: string;
-  history: string; features: string; description: string; image: string;
+  id: number; name: string; alias: string | null; type: string; origin: string;
+  history: string | null; features: string | null; description: string; image: string;
 };
 
 export default function AdminMaterialsPage() {
   const [items, setItems] = useState<Mat[]>([]);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: "", alias: "", type: "", origin: "", history: "", features: "", description: "", image: "" });
   const [loading, setLoading] = useState(false);
@@ -26,7 +26,7 @@ export default function AdminMaterialsPage() {
   }
 
   function editItem(m: Mat) {
-    setForm({ name: m.name, alias: m.alias, type: m.type, origin: m.origin, history: m.history, features: m.features, description: m.description, image: m.image });
+    setForm({ name: m.name, alias: m.alias ?? "", type: m.type, origin: m.origin, history: m.history ?? "", features: m.features ?? "", description: m.description, image: m.image });
     setEditingId(m.id); setShowForm(true);
   }
 
@@ -36,7 +36,7 @@ export default function AdminMaterialsPage() {
     resetForm(); await load(); setLoading(false);
   }
 
-  async function handleDelete(id: string) { if (!confirm("确定删除？")) return; await deleteMaterial(id); await load(); }
+  async function handleDelete(id: number) { if (!confirm("确定删除？")) return; await deleteMaterial(id); await load(); }
 
   const textStyle = { color: "var(--yun-text)" };
   const subStyle = { color: "var(--yun-subtext)" };

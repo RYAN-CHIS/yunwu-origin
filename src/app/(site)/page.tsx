@@ -69,7 +69,7 @@ export default async function HomePage() {
   const featuredByCategory = await Promise.all(
     featuredCategories.map(async (cat) => {
       const products = await prisma.product.findMany({
-        where: { status: 'published', objectCategory: { slug: cat.slug } },
+        where: { status: 'published', object_category: cat.key },
         include: { series: true },
         take: 2,
         orderBy: { createdAt: 'desc' },

@@ -8,12 +8,12 @@ export const metadata: Metadata = {
 };
 
 const categoryConfig: Record<string, { name: string; english: string; desc: string; icon: string }> = {
-  bracelet: { name: '珠串', english: 'Bracelets', desc: '人与材质的关系', icon: '○' },
-  incense:  { name: '香器', english: 'Incense Objects', desc: '人与气味的关系', icon: '△' },
-  seal:     { name: '印章', english: 'Seals', desc: '人与文字的关系', icon: '□' },
-  ceramic:  { name: '瓷器', english: 'Ceramics', desc: '人与日常的关系', icon: '◇' },
-  enamel:   { name: '珐琅', english: 'Enamel', desc: '人与工艺的关系', icon: '☆' },
-  scholar:  { name: '文房', english: 'Scholar Objects', desc: '人与精神空间的关系', icon: '一' },
+  BRACELET:  { name: '珠串',  english: 'Bracelets',  desc: '人与材质的关系',  icon: '○' },
+  INCENSE:  { name: '香器',  english: 'Incense Objects', desc: '人与气味的关系',  icon: '△' },
+  SEAL:     { name: '印章',  english: 'Seals',     desc: '人与文字的关系',  icon: '□' },
+  CERAMIC: { name: '瓷器',  english: 'Ceramics',  desc: '人与日常的关系',  icon: '◇' },
+  ENAMEL:  { name: '珐琅',  english: 'Enamel',    desc: '人与工艺的关系',  icon: '☆' },
+  SCHOLAR: { name: '文房',  english: 'Scholar Objects', desc: '人与精神空间的关系', icon: '一' },
 };
 
 export default async function ObjectsPage({
@@ -26,12 +26,12 @@ export default async function ObjectsPage({
 
   const where: any = {
     status: 'published',
-    ...(activeCategory ? { objectCategory: { slug: activeCategory } } : {}),
+    ...(activeCategory ? { objectCategory: activeCategory.toUpperCase() as any } : {}),
   };
 
   const products = await prisma.product.findMany({
     where,
-    include: { series: true, objectCategory: true },
+    include: { series: true },
     orderBy: { createdAt: 'desc' },
   });
 
@@ -130,7 +130,7 @@ export default async function ObjectsPage({
                   </div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-xs text-yun-accent/60 tracking-wider">
-                      {categoryConfig[p.objectCategory.slug]?.name || p.objectCategory.name}
+                      {categoryConfig[p.object_category]?.name || p.object_category}
                     </span>
                     <span className="text-xs text-yun-text/30">·</span>
                     <span className="text-xs text-yun-text/40 tracking-wider">{p.series.name}</span>

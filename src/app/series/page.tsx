@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import prisma from '@/lib/prisma';
+import SectionWrapper from '@/components/ui/SectionWrapper';
 
 // ── 七序数据映射（来自《允物品牌宪章》第七篇）──
 const seriesConstitution: Record<string, {
@@ -66,96 +67,96 @@ export default async function SeriesIndexPage() {
   const series = await prisma.series.findMany({ orderBy: { sortOrder: 'asc' } });
 
   return (
-    <main className="min-h-screen bg-yun-bg">
+    <main className="bg-[var(--yun-paper)] min-h-screen">
       {/* Hero */}
-      <section className="py-24 md:py-32 px-6 md:px-12 pt-32 md:pt-40">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="font-display text-6xl md:text-8xl text-yun-accent/10 tracking-widest leading-none mb-8">
+      <SectionWrapper className="min-h-[40vh] flex items-center justify-center">
+        <div className="text-center max-w-4xl mx-auto fade-in">
+          <p className="font-display text-6xl md:text-8xl text-[var(--yun-ink)]/5 tracking-widest leading-none mb-8">
             SEQUENCE
           </p>
-          <h1 className="text-3xl md:text-4xl font-light tracking-[0.15em] text-yun-text mb-6">
+          <h1 className="text-3xl md:text-4xl font-light tracking-[0.15em] text-[var(--yun-ink)] mb-6">
             七序
           </h1>
-          <div className="divider mt-0 mb-6" />
-          <p className="text-lg md:text-xl text-yun-subtext leading-relaxed max-w-2xl mx-auto">
+          <div className="divider mb-6" />
+          <p className="text-lg md:text-xl text-[var(--yun-gray)] leading-relaxed max-w-2xl mx-auto">
             七种人生状态
           </p>
-          <p className="text-sm text-yun-text/50 leading-loose max-w-xl mx-auto mt-4">
+          <p className="text-sm text-[var(--yun-gray)] leading-loose max-w-xl mx-auto mt-4">
             七序不是等级，不是价格体系，不是会员制度。它们是人生不同阶段的映照——不是向上的阶梯，而是向内的旅程。你在七序中看到的，其实是不同阶段的自己。
           </p>
         </div>
-      </section>
+      </SectionWrapper>
 
-      {/* 七序全览 */}
-      <section className="px-6 md:px-12 pb-24">
-        <div className="max-w-6xl mx-auto">
-          {/* 第一行：前 4 序 */}
-          <div className="grid md:grid-cols-4 gap-4 mb-4">
-            {series.slice(0, 4).map((s) => {
-              const data = seriesConstitution[s.slug] || { subtitle: '', poem: '', description: '', keywords: '', works: '' };
-              return (
-                <Link
-                  key={s.id}
-                  href={`/series/${s.slug}`}
-                  className="group bg-white p-6 md:p-8 hover:shadow-md transition-all duration-300 border border-yun-line hover:border-yun-accent/20"
-                >
-                  <p className="text-xs text-yun-accent tracking-[0.15em] mb-3 font-medium">
-                    第{chineseOrdinals[s.sortOrder - 1]}序 · {data.subtitle}
-                  </p>
-                  <h3 className="text-2xl md:text-3xl font-light tracking-wider mb-3 group-hover:text-yun-accent transition-colors">
-                    {s.name}
-                  </h3>
-                  <p className="text-sm text-yun-text/60 font-light italic mb-3 leading-relaxed">
-                    {data.poem}
-                  </p>
-                  <p className="text-xs text-yun-text/50 leading-relaxed mb-3">
-                    {data.description}
-                  </p>
-                  <p className="text-[11px] text-yun-accent/60 tracking-wider mb-3">{data.keywords}</p>
-                  <p className="text-[10px] text-yun-border tracking-wider border-t border-yun-line/50 pt-3">
-                    作品体系：{data.works}
-                  </p>
-                </Link>
-              );
-            })}
-          </div>
-
-          {/* 第二行：后 3 序 */}
-          <div className="grid md:grid-cols-3 gap-4">
-            {series.slice(4).map((s) => {
-              const data = seriesConstitution[s.slug] || { subtitle: '', poem: '', description: '', keywords: '', works: '' };
-              return (
-                <Link
-                  key={s.id}
-                  href={`/series/${s.slug}`}
-                  className="group bg-white p-6 md:p-8 hover:shadow-md transition-all duration-300 border border-yun-line hover:border-yun-accent/20"
-                >
-                  <p className="text-xs text-yun-accent tracking-[0.15em] mb-3 font-medium">
-                    第{chineseOrdinals[s.sortOrder - 1]}序 · {data.subtitle}
-                  </p>
-                  <h3 className="text-2xl md:text-3xl font-light tracking-wider mb-3 group-hover:text-yun-accent transition-colors">
-                    {s.name}
-                  </h3>
-                  <p className="text-sm text-yun-text/60 font-light italic mb-3 leading-relaxed">
-                    {data.poem}
-                  </p>
-                  <p className="text-xs text-yun-text/50 leading-relaxed mb-3">
-                    {data.description}
-                  </p>
-                  <p className="text-[11px] text-yun-accent/60 tracking-wider mb-3">{data.keywords}</p>
-                  <p className="text-[10px] text-yun-border tracking-wider border-t border-yun-line/50 pt-3">
-                    作品体系：{data.works}
-                  </p>
-                </Link>
-              );
-            })}
-          </div>
+      {/* 七序卡片 */}
+      <SectionWrapper>
+        {/* 第一行：前 4 序 */}
+        <div className="grid md:grid-cols-4 gap-4 mb-4">
+          {series.slice(0, 4).map((s, idx) => {
+            const data = seriesConstitution[s.slug] || { subtitle: '', poem: '', description: '', keywords: '', works: '' };
+            return (
+              <Link
+                key={s.id}
+                href={`/series/${s.slug}`}
+                className="group bg-[var(--yun-paper)] p-6 md:p-8 rounded-[var(--yun-radius)] border border-[var(--yun-border)]/20 hover:-translate-y-1 hover:shadow-[var(--yun-shadow-hover)] transition-all duration-300 fade-in"
+                style={{ animationDelay: `${idx * 0.1}s` }}
+              >
+                <span className="text-xs text-[var(--yun-jade)] tracking-[0.15em] mb-3 block font-medium">
+                  第{chineseOrdinals[s.sortOrder - 1]}序 · {data.subtitle}
+                </span>
+                <h3 className="text-2xl md:text-3xl font-light tracking-wider mb-3 text-[var(--yun-ink)] group-hover:text-[var(--yun-jade)] transition-colors">
+                  {s.name}
+                </h3>
+                <p className="text-sm text-[var(--yun-gray)] font-light italic mb-3 leading-relaxed">
+                  {data.poem}
+                </p>
+                <p className="text-xs text-[var(--yun-gray)] leading-relaxed mb-3">
+                  {data.description}
+                </p>
+                <p className="text-[11px] text-[var(--yun-jade)]/60 tracking-wider mb-3">{data.keywords}</p>
+                <p className="text-[10px] text-[var(--yun-gray)] tracking-wider border-t border-[var(--yun-border)]/30 pt-3">
+                  作品体系：{data.works}
+                </p>
+              </Link>
+            );
+          })}
         </div>
-      </section>
+
+        {/* 第二行：后 3 序 */}
+        <div className="grid md:grid-cols-3 gap-4">
+          {series.slice(4).map((s, idx) => {
+            const data = seriesConstitution[s.slug] || { subtitle: '', poem: '', description: '', keywords: '', works: '' };
+            return (
+              <Link
+                key={s.id}
+                href={`/series/${s.slug}`}
+                className="group bg-[var(--yun-paper)] p-6 md:p-8 rounded-[var(--yun-radius)] border border-[var(--yun-border)]/20 hover:-translate-y-1 hover:shadow-[var(--yun-shadow-hover)] transition-all duration-300 fade-in"
+                style={{ animationDelay: `${(idx + 4) * 0.1}s` }}
+              >
+                <span className="text-xs text-[var(--yun-jade)] tracking-[0.15em] mb-3 block font-medium">
+                  第{chineseOrdinals[s.sortOrder - 1]}序 · {data.subtitle}
+                </span>
+                <h3 className="text-2xl md:text-3xl font-light tracking-wider mb-3 text-[var(--yun-ink)] group-hover:text-[var(--yun-jade)] transition-colors">
+                  {s.name}
+                </h3>
+                <p className="text-sm text-[var(--yun-gray)] font-light italic mb-3 leading-relaxed">
+                  {data.poem}
+                </p>
+                <p className="text-xs text-[var(--yun-gray)] leading-relaxed mb-3">
+                  {data.description}
+                </p>
+                <p className="text-[11px] text-[var(--yun-jade)]/60 tracking-wider mb-3">{data.keywords}</p>
+                <p className="text-[10px] text-[var(--yun-gray)] tracking-wider border-t border-[var(--yun-border)]/30 pt-3">
+                  作品体系：{data.works}
+                </p>
+              </Link>
+            );
+          })}
+        </div>
+      </SectionWrapper>
 
       {/* 返回 */}
-      <div className="text-center pb-20">
-        <Link href="/" className="text-sm text-yun-accent tracking-wider hover:opacity-70 transition-opacity">
+      <div className="text-center pb-24">
+        <Link href="/" className="text-sm text-[var(--yun-jade)] tracking-wider hover:opacity-70 transition-opacity">
           ← 返回首页
         </Link>
       </div>

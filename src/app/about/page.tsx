@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import SectionWrapper from '@/components/ui/SectionWrapper';
 
 export const metadata: Metadata = {
   title: '品牌故事｜允物 Yunwu Origin',
@@ -8,23 +9,30 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <>
-      <section className="min-h-[45vh] flex items-center justify-center pt-16">
-        <div className="text-center max-w-2xl px-6">
-          <p className="font-display text-lg text-yun-accent/60 tracking-[0.2em] mb-4">About Yunwu</p>
-          <h1 className="text-3xl font-light tracking-[0.15em] mb-6">允物为何存在</h1>
-          <div className="divider mb-8" />
-          <p className="text-lg text-yun-accent/80 font-light tracking-wider leading-relaxed">
+    <main className="min-h-screen bg-[var(--yun-paper)]">
+      {/* Hero */}
+      <SectionWrapper className="min-h-[45vh] flex items-center justify-center">
+        <div className="text-center max-w-4xl mx-auto fade-in">
+          <p className="font-display text-6xl md:text-8xl text-[var(--yun-ink)]/5 tracking-widest leading-none mb-8">
+            ABOUT
+          </p>
+          <h1 className="font-display text-3xl md:text-4xl text-[var(--yun-ink)] tracking-wide mb-6">
+            允物为何存在
+          </h1>
+          <p className="text-lg md:text-xl text-[var(--yun-gray)] leading-relaxed max-w-2xl mx-auto">
             让物归物，让心归心。
           </p>
         </div>
-      </section>
+      </SectionWrapper>
 
+      {/* 正文 */}
       <div className="max-w-2xl mx-auto px-6 pb-24 space-y-20">
         {/* 品牌起源 */}
-        <section>
-          <h2 className="text-lg font-light tracking-[0.12em] mb-6 pb-3 border-b border-yun-grey/30">品牌起源</h2>
-          <div className="text-sm text-yun-text/70 leading-loose space-y-4">
+        <section className="fade-in">
+          <h2 className="text-lg font-light tracking-[0.12em] mb-6 pb-3 border-b border-[var(--yun-border)] text-[var(--yun-ink)]">
+            品牌起源
+          </h2>
+          <div className="text-sm text-[var(--yun-gray)] leading-loose space-y-4">
             <p>
               允物不是关于产品的品牌，而是关于人与器物关系的品牌。
             </p>
@@ -41,44 +49,50 @@ export default function AboutPage() {
         </section>
 
         {/* 品牌名释义 */}
-        <section>
-          <h2 className="text-lg font-light tracking-[0.12em] mb-6 pb-3 border-b border-yun-grey/30">品牌名</h2>
-          <div className="text-sm text-yun-text/70 leading-loose space-y-4">
+        <section className="fade-in">
+          <h2 className="text-lg font-light tracking-[0.12em] mb-6 pb-3 border-b border-[var(--yun-border)] text-[var(--yun-ink)]">
+            品牌名
+          </h2>
+          <div className="text-sm text-[var(--yun-gray)] leading-loose space-y-4">
             <p>
               允物二字，本身便是一种答案。允者，允执厥中，允恭克让。物者，万物有灵，器以载道。
             </p>
-            <p className="text-yun-accent/80">
+            <p className="text-[var(--yun-jade)]">
               允物，不是拥有万物。而是：允许万物成为它本来的样子，也允许自己成为自己。
             </p>
           </div>
         </section>
 
         {/* 东方器物观 */}
-        <section>
-          <h2 className="text-lg font-light tracking-[0.12em] mb-6 pb-3 border-b border-yun-grey/30">东方器物观</h2>
-          <div className="text-sm text-yun-text/70 leading-loose space-y-4">
+        <section className="fade-in">
+          <h2 className="text-lg font-light tracking-[0.12em] mb-6 pb-3 border-b border-[var(--yun-border)] text-[var(--yun-ink)]">
+            东方器物观
+          </h2>
+          <div className="text-sm text-[var(--yun-gray)] leading-loose space-y-4">
             <p>
               允物认为：现代人的很多焦虑，来自于关系失衡。人与物失衡，人与自己失衡，人与世界失衡。
             </p>
             <p>因此允物提出：「人 · 物 · 心」三位一体的器物观。</p>
             <ul className="space-y-3 mt-4">
               <li>
-                <span className="text-yun-accent">人</span>：不断成长的主体。真正重要的，始终是使用器物的人。
+                <span className="text-[var(--yun-jade)]">人</span>：不断成长的主体。真正重要的，始终是使用器物的人。
               </li>
               <li>
-                <span className="text-yun-accent">物</span>：承载时间与情感的媒介。器物无需承担改变命运的责任，它的意义是陪伴、记录与见证。
+                <span className="text-[var(--yun-jade)]">物</span>：承载时间与情感的媒介。器物无需承担改变命运的责任，它的意义是陪伴、记录与见证。
               </li>
               <li>
-                <span className="text-yun-accent">心</span>：一切价值的最终归处。允物所做的一切，都是帮助人通过器物重新看见自己的内心。
+                <span className="text-[var(--yun-jade)]">心</span>：一切价值的最终归处。允物所做的一切，都是帮助人通过器物重新看见自己的内心。
               </li>
             </ul>
           </div>
         </section>
 
         {/* 工艺体系 */}
-        <section>
-          <h2 className="text-lg font-light tracking-[0.12em] mb-6 pb-3 border-b border-yun-grey/30">工艺体系</h2>
-          <p className="text-sm text-yun-text/50 leading-loose mb-8">
+        <section className="fade-in">
+          <h2 className="text-lg font-light tracking-[0.12em] mb-6 pb-3 border-b border-[var(--yun-border)] text-[var(--yun-ink)]">
+            工艺体系
+          </h2>
+          <p className="text-sm text-[var(--yun-gray)] leading-loose mb-8">
             允物承袭东方传统工艺精神，融合当代审美，以手工打磨的每件作品，只为一件值得长久陪伴的器物。
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
@@ -90,7 +104,7 @@ export default function AboutPage() {
               { name: '皮具', img: '/images/crafts/leather.png', desc: '以最质朴的方式，呈现时间独有的纹理' },
             ].map((craft) => (
               <div key={craft.name} className="group text-center">
-                <div className="aspect-square rounded-brand overflow-hidden bg-yun-bg-secondary mb-3 border border-yun-line/50">
+                <div className="aspect-square rounded-[var(--yun-radius)] overflow-hidden bg-[var(--yun-hover)] mb-3 border border-[var(--yun-border)]/50">
                   <img
                     src={craft.img}
                     alt={craft.name}
@@ -98,17 +112,19 @@ export default function AboutPage() {
                     loading="lazy"
                   />
                 </div>
-                <p className="text-sm tracking-wider font-medium mb-1">{craft.name}</p>
-                <p className="text-xs text-yun-text/40 leading-relaxed">{craft.desc}</p>
+                <p className="text-sm tracking-wider font-medium mb-1 text-[var(--yun-ink)]">{craft.name}</p>
+                <p className="text-xs text-[var(--yun-gray)]/60 leading-relaxed">{craft.desc}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* 七序世界观 */}
-        <section>
-          <h2 className="text-lg font-light tracking-[0.12em] mb-6 pb-3 border-b border-yun-grey/30">七序世界观</h2>
-          <div className="text-sm text-yun-text/70 leading-loose space-y-4">
+        <section className="fade-in">
+          <h2 className="text-lg font-light tracking-[0.12em] mb-6 pb-3 border-b border-[var(--yun-border)] text-[var(--yun-ink)]">
+            七序世界观
+          </h2>
+          <div className="text-sm text-[var(--yun-gray)] leading-loose space-y-4">
             <p>
               七序不是等级，不是价格体系，不是会员制度。
             </p>
@@ -126,23 +142,25 @@ export default function AboutPage() {
               { name: '观复', subtitle: '收藏之序', poem: '万物并作，吾以观复', desc: '看遍繁华，终归本心。', keys: '收藏 · 美学 · 回归 · 时间' },
               { name: '藏真', subtitle: '传承之序', poem: '真者，受于天也，自然不可易也', desc: '最终留下的，只有真实。', keys: '孤品 · 匠心 · 传承 · 永恒' },
             ].map((seq, i) => (
-              <div key={seq.name} className="border border-yun rounded-brand p-5">
-                <p className="text-xs text-yun-accent/50 tracking-widest mb-1">
+              <div key={seq.name} className="border border-[var(--yun-border)] rounded-[var(--yun-radius)] p-5 bg-[var(--yun-paper)]">
+                <p className="text-xs text-[var(--yun-jade)]/60 tracking-widest mb-1">
                   第{['一','二','三','四','五','六','七'][i]}序 · {seq.subtitle}
                 </p>
-                <p className="text-base tracking-wider mb-2 font-medium">{seq.name}</p>
-                <p className="text-sm text-yun-accent/70 font-light italic mb-2">「{seq.poem}」</p>
-                <p className="text-xs text-yun-text/50 leading-relaxed mb-2">{seq.desc}</p>
-                <p className="text-[11px] text-yun-accent/40 tracking-wider">{seq.keys}</p>
+                <p className="text-base tracking-wider mb-2 font-medium text-[var(--yun-ink)]">{seq.name}</p>
+                <p className="text-sm text-[var(--yun-jade)]/70 font-light italic mb-2">「{seq.poem}」</p>
+                <p className="text-xs text-[var(--yun-gray)] leading-relaxed mb-2">{seq.desc}</p>
+                <p className="text-[11px] text-[var(--yun-jade)]/40 tracking-wider">{seq.keys}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* 对材料的理解 */}
-        <section>
-          <h2 className="text-lg font-light tracking-[0.12em] mb-6 pb-3 border-b border-yun-grey/30">对材料的理解</h2>
-          <div className="text-sm text-yun-text/70 leading-loose space-y-4">
+        <section className="fade-in">
+          <h2 className="text-lg font-light tracking-[0.12em] mb-6 pb-3 border-b border-[var(--yun-border)] text-[var(--yun-ink)]">
+            对材料的理解
+          </h2>
+          <div className="text-sm text-[var(--yun-gray)] leading-loose space-y-4">
             <p>
               每一种材料都有它的来历、性格和故事。水晶是大地亿万年的结晶，沉香是树木受伤后的自我修复，檀木是数十年缓慢生长的年轮。它们不说话，但本身就是时间最诚实的作品。
             </p>
@@ -153,19 +171,23 @@ export default function AboutPage() {
         </section>
 
         {/* 对时间的理解 */}
-        <section>
-          <h2 className="text-lg font-light tracking-[0.12em] mb-6 pb-3 border-b border-yun-grey/30">对时间的理解</h2>
-          <div className="text-sm text-yun-text/70 leading-loose space-y-4">
+        <section className="fade-in">
+          <h2 className="text-lg font-light tracking-[0.12em] mb-6 pb-3 border-b border-[var(--yun-border)] text-[var(--yun-ink)]">
+            对时间的理解
+          </h2>
+          <div className="text-sm text-[var(--yun-gray)] leading-loose space-y-4">
             <p>允物信奉长期主义。我们不追求短期爆款，追求十年后依然值得拥有的东西。</p>
             <p>产品会老去，市场会变化，流量会消失。唯有信任会不断累积——这才是允物真正的护城河。</p>
           </div>
         </section>
 
         {/* 商业伦理 */}
-        <section>
-          <h2 className="text-lg font-light tracking-[0.12em] mb-6 pb-3 border-b border-yun-grey/30">商业伦理</h2>
-          <div className="text-sm text-yun-text/70 leading-loose space-y-4">
-            <p className="text-yun-accent/80 font-medium">
+        <section className="fade-in">
+          <h2 className="text-lg font-light tracking-[0.12em] mb-6 pb-3 border-b border-[var(--yun-border)] text-[var(--yun-ink)]">
+            商业伦理
+          </h2>
+          <div className="text-sm text-[var(--yun-gray)] leading-loose space-y-4">
+            <p className="text-[var(--yun-jade)] font-medium">
               最好的商业，不是让人不断购买，而是让人不断成长。
               最好的品牌，不是让人依赖品牌，而是帮助人建立自己的判断力。
               最好的器物，不是改变命运，而是在人生的重要时刻，安静地陪伴你。
@@ -176,8 +198,8 @@ export default function AboutPage() {
         </section>
 
         {/* 品牌终章 */}
-        <section className="text-center pt-10">
-          <p className="text-yun-accent/80 text-lg font-light tracking-wider leading-loose">
+        <section className="text-center pt-10 fade-in">
+          <p className="text-[var(--yun-jade)] text-lg font-light tracking-wider leading-loose">
             愿你拥有器物，但不被器物拥有。
             <br />
             愿你欣赏万物，但不执着于万物。
@@ -185,11 +207,11 @@ export default function AboutPage() {
             愿你见天地，见众生，最终见自己。
           </p>
           <div className="divider mt-10" />
-          <p className="text-sm text-yun-text/40 mt-6 tracking-wider">
+          <p className="text-sm text-[var(--yun-gray)] mt-6 tracking-wider">
             让物归物，让心归心。允许万物，成为万物。
           </p>
         </section>
       </div>
-    </>
+    </main>
   );
 }

@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import prisma from '@/lib/prisma';
+import SectionWrapper from '@/components/ui/SectionWrapper';
+import ProductCard from '@/components/ui/ProductCard';
 
 export const metadata = {
-  title: '全部作品｜允物 Yunwu Origin',
+  title: '全部作品｜允物',
   description: '浏览允物全部作品，探索七序体系中的每一件器物。每一件作品都是东方审美与现代生活的相遇。',
 };
 
@@ -22,45 +24,57 @@ export default async function ProductsPage() {
   }
 
   return (
-    <>
-      <section className="min-h-[40vh] flex items-center justify-center pt-16">
-        <div className="text-center px-6">
-          <p className="font-display text-lg text-yun-accent/60 tracking-[0.2em] mb-2">All Works</p>
-          <h1 className="text-3xl font-light tracking-[0.15em] mb-4">全部作品</h1>
-          <div className="divider" />
+    <main className="bg-[var(--yun-paper)] min-h-screen">
+      {/* Hero */}
+      <SectionWrapper className="min-h-[30vh] flex items-center justify-center">
+        <div className="text-center fade-in">
+          <p className="font-display text-6xl md:text-8xl text-[var(--yun-ink)]/5 tracking-widest leading-none mb-8">
+            WORKS
+          </p>
+          <h1 className="text-3xl md:text-4xl font-light tracking-[0.15em] text-[var(--yun-ink)] mb-6">
+            全部作品
+          </h1>
+          <div className="divider mb-6" />
+          <p className="text-sm text-[var(--yun-gray)] leading-loose max-w-xl mx-auto">
+            每一件器物，都承载着材料、工艺与时间的温度。
+          </p>
         </div>
-      </section>
+      </SectionWrapper>
 
-      <section className="pb-24">
-        <div className="container-brand">
-          {Object.entries(grouped).map(([seriesName, items]) => (
-            <div key={seriesName} className="mb-20">
-              <h2 className="text-lg font-light tracking-[0.1em] mb-8 pb-4 border-b border-yun-grey/30">
-                {seriesName}
-                <span className="text-sm text-yun-text/30 ml-2">{items.length} 件作品</span>
-              </h2>
+      {/* 分组作品列表 */}
+      {Object.entries(grouped).map(([seriesName, items], groupIdx) => (
+        <SectionWrapper key={seriesName}>
+          <div className="fade-in" style={{ animationDelay: `${groupIdx * 0.1}s` }}>
+            <h2 className="text-lg font-light tracking-[0.1em] text-[var(--yun-ink)] mb-8 pb-4 border-b border-[var(--yun-border)]/30">
+              {seriesName}
+              <span className="text-sm text-[var(--yun-gray)] ml-2">{items.length} 件作品</span>
+            </h2>
 
-              <div className="grid md:grid-cols-4 gap-8">
-                {items.map((p) => (
-                  <Link key={p.id} href={`/products/${p.slug}`} className="group">
-                    <div className="aspect-[3/4] bg-yun-grey/20 rounded-brand mb-4 flex items-center justify-center">
-                      <span className="text-5xl font-display text-yun-text/20 group-hover:text-yun-accent/30 transition-colors">
-                        {p.name.charAt(0)}
-                      </span>
-                    </div>
-                    <h3 className="text-base font-light tracking-wider mb-1 group-hover:text-yun-accent transition-colors">
-                      {p.name}
-                    </h3>
-                    <p className="text-xs text-yun-text/40 mb-2 line-clamp-2">{p.theme}</p>
-                    <p className="text-sm text-yun-text/50">¥{p.salePrice.toLocaleString()}</p>
-                  </Link>
-                ))}
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+              {items.map((p) => (
+                <ProductCard
+                  key={p.id}
+                  slug={p.slug}
+                  name={p.name}
+                  coverImage={p.coverImage}
+                  seriesName={p.series?.name}
+                  seriesSlug={p.series?.slug}
+                  salePrice={p.salePrice}
+                  objectCategory={p.objectCategory}
+                />
+              ))}
             </div>
-          ))}
-        </div>
-      </section>
-    </>
+          </div>
+        </SectionWrapper>
+      ))}
+
+      {/* 返回 */}
+      <div className="text-center pb-24">
+        <Link href="/" className="text-sm text-[var(--yun-jade)] tracking-wider hover:opacity-70 transition-opacity">
+          ← 返回首页
+        </Link>
+      </div>
+    </main>
   );
 }
 

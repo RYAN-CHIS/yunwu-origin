@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import SectionWrapper from '@/components/ui/SectionWrapper';
 
 interface CartItem {
   slug: string;
@@ -20,9 +21,9 @@ export default function CheckoutPage() {
 
 function CheckoutLoading() {
   return (
-    <section className="min-h-[60vh] flex items-center justify-center pt-16">
-      <p className="text-sm text-yun-text/30 tracking-wider">加载中...</p>
-    </section>
+    <SectionWrapper className="min-h-[60vh] flex items-center justify-center">
+      <p className="text-sm text-[var(--yun-gray)] tracking-wider">加载中...</p>
+    </SectionWrapper>
   );
 }
 
@@ -73,113 +74,128 @@ function CheckoutContent() {
   // 成功页面
   if (success === '1') {
     return (
-      <section className="min-h-[60vh] flex items-center justify-center pt-16">
-        <div className="text-center max-w-md px-6">
-          <div className="text-6xl mb-8">☁️</div>
-          <h1 className="text-2xl font-light tracking-[0.12em] mb-4">获取确认</h1>
-          <div className="divider mb-8" />
-          <p className="text-sm text-yun-text/60 leading-loose mb-4">
-            您的获取请求已提交。
-            我们将尽快与您联系确认订单详情。
-          </p>
-          <p className="text-xs text-yun-text/30 tracking-wider mb-10">
-            如有疑问请通过公众号「允物 Yunwu」联系我们
-          </p>
-          <a href="/" className="btn-outline">
-            返回首页
-          </a>
-        </div>
-      </section>
+      <main className="min-h-screen bg-[var(--yun-paper)]">
+        <SectionWrapper className="min-h-[60vh] flex items-center justify-center">
+          <div className="text-center max-w-md mx-auto fade-in">
+            <div className="text-6xl mb-8">☁️</div>
+            <h1 className="text-2xl font-light tracking-[0.12em] mb-4 text-[var(--yun-ink)]">获取确认</h1>
+            <div className="divider mb-8" />
+            <p className="text-sm text-[var(--yun-gray)] leading-loose mb-4">
+              您的获取请求已提交。
+              我们将尽快与您联系确认订单详情。
+            </p>
+            <p className="text-xs text-[var(--yun-gray)]/50 tracking-wider mb-10">
+              如有疑问请通过公众号「允物 Yunwu」联系我们
+            </p>
+            <a
+              href="/"
+              className="inline-block px-8 py-3 border border-[var(--yun-border)] rounded-[var(--yun-radius-pill)] text-sm tracking-wider text-[var(--yun-ink)] hover:bg-[var(--yun-ink)] hover:text-[var(--yun-paper)] hover:border-[var(--yun-ink)] transition-all duration-300"
+            >
+              返回首页
+            </a>
+          </div>
+        </SectionWrapper>
+      </main>
     );
   }
 
   return (
-    <>
-      <section className="min-h-[30vh] flex items-center justify-center pt-16">
-        <div className="text-center px-6">
-          <p className="font-display text-lg text-yun-accent/60 tracking-[0.2em] mb-2">Checkout</p>
-          <h1 className="text-2xl font-light tracking-[0.15em]">获取作品</h1>
-          <div className="divider mt-6" />
+    <main className="min-h-screen bg-[var(--yun-paper)]">
+      {/* Hero */}
+      <SectionWrapper className="min-h-[30vh] flex items-center justify-center">
+        <div className="text-center max-w-4xl mx-auto fade-in">
+          <p className="font-display text-6xl md:text-8xl text-[var(--yun-ink)]/5 tracking-widest leading-none mb-8">
+            CHECKOUT
+          </p>
+          <h1 className="font-display text-3xl md:text-4xl text-[var(--yun-ink)] tracking-wide mb-6">
+            获取作品
+          </h1>
         </div>
-      </section>
+      </SectionWrapper>
 
-      <section className="pb-24">
-        <div className="container-brand max-w-2xl">
+      {/* 订单表单 */}
+      <SectionWrapper>
+        <div className="max-w-2xl mx-auto">
           {cart.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-sm text-yun-text/40 tracking-wider mb-6">购物袋是空的</p>
-              <a href="/products" className="btn-outline">浏览作品</a>
+              <p className="text-sm text-[var(--yun-gray)] tracking-wider mb-6">购物袋是空的</p>
+              <a
+                href="/products"
+                className="inline-block px-8 py-3 border border-[var(--yun-border)] rounded-[var(--yun-radius-pill)] text-sm tracking-wider text-[var(--yun-ink)] hover:bg-[var(--yun-ink)] hover:text-[var(--yun-paper)] hover:border-[var(--yun-ink)] transition-all duration-300"
+              >
+                浏览作品
+              </a>
             </div>
           ) : (
             <div className="space-y-8">
               {/* 订单摘要 */}
-              <div className="border border-yun rounded-brand p-6">
-                <h2 className="text-sm font-light tracking-wider mb-4">订单摘要</h2>
+              <div className="border border-[var(--yun-border)] rounded-[var(--yun-radius)] p-6">
+                <h2 className="text-sm font-light tracking-wider mb-4 text-[var(--yun-ink)]">订单摘要</h2>
                 {cart.map((item, i) => (
-                  <div key={i} className="flex justify-between items-center py-3 border-b border-yun-grey/20 last:border-0">
+                  <div key={i} className="flex justify-between items-center py-3 border-b border-[var(--yun-border)]/20 last:border-0">
                     <div>
-                      <p className="text-sm tracking-wider">{item.name}</p>
-                      <p className="text-xs text-yun-text/30">x{item.quantity}</p>
+                      <p className="text-sm tracking-wider text-[var(--yun-ink)]">{item.name}</p>
+                      <p className="text-xs text-[var(--yun-gray)]/50">x{item.quantity}</p>
                     </div>
-                    <p className="text-sm text-yun-text/60">¥{(item.price * item.quantity).toLocaleString()}</p>
+                    <p className="text-sm text-[var(--yun-gray)]">¥{(item.price * item.quantity).toLocaleString()}</p>
                   </div>
                 ))}
-                <div className="flex justify-between items-center mt-4 pt-3 border-t border-yun">
-                  <p className="text-sm tracking-wider">合计</p>
-                  <p className="text-lg font-light tracking-wider">¥{total.toLocaleString()}</p>
+                <div className="flex justify-between items-center mt-4 pt-3 border-t border-[var(--yun-border)]">
+                  <p className="text-sm tracking-wider text-[var(--yun-ink)]">合计</p>
+                  <p className="text-lg font-light tracking-wider text-[var(--yun-ink)]">¥{total.toLocaleString()}</p>
                 </div>
               </div>
 
               {/* 联系信息 */}
-              <form onSubmit={handleSubmit} className="border border-yun rounded-brand p-6 space-y-5">
-                <h2 className="text-sm font-light tracking-wider mb-4">联系信息</h2>
+              <form onSubmit={handleSubmit} className="border border-[var(--yun-border)] rounded-[var(--yun-radius)] p-6 space-y-5">
+                <h2 className="text-sm font-light tracking-wider mb-4 text-[var(--yun-ink)]">联系信息</h2>
                 <div>
-                  <label className="block text-xs text-yun-text/50 tracking-wider mb-2">姓名</label>
+                  <label className="block text-xs text-[var(--yun-gray)] tracking-wider mb-2">姓名</label>
                   <input
                     type="text"
                     required
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full px-4 py-3 border border-yun rounded-brand bg-transparent text-sm focus:outline-none focus:border-yun-accent transition-colors"
+                    className="w-full px-4 py-3 border border-[var(--yun-border)] rounded-[var(--yun-radius)] bg-transparent text-sm text-[var(--yun-ink)] focus:outline-none focus:border-[var(--yun-jade)] transition-colors"
                     placeholder="请输入您的姓名"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-yun-text/50 tracking-wider mb-2">电话</label>
+                  <label className="block text-xs text-[var(--yun-gray)] tracking-wider mb-2">电话</label>
                   <input
                     type="tel"
                     required
                     value={form.phone}
                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                    className="w-full px-4 py-3 border border-yun rounded-brand bg-transparent text-sm focus:outline-none focus:border-yun-accent transition-colors"
+                    className="w-full px-4 py-3 border border-[var(--yun-border)] rounded-[var(--yun-radius)] bg-transparent text-sm text-[var(--yun-ink)] focus:outline-none focus:border-[var(--yun-jade)] transition-colors"
                     placeholder="请输入您的手机号"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-yun-text/50 tracking-wider mb-2">地址</label>
+                  <label className="block text-xs text-[var(--yun-gray)] tracking-wider mb-2">地址</label>
                   <input
                     type="text"
                     required
                     value={form.address}
                     onChange={(e) => setForm({ ...form, address: e.target.value })}
-                    className="w-full px-4 py-3 border border-yun rounded-brand bg-transparent text-sm focus:outline-none focus:border-yun-accent transition-colors"
+                    className="w-full px-4 py-3 border border-[var(--yun-border)] rounded-[var(--yun-radius)] bg-transparent text-sm text-[var(--yun-ink)] focus:outline-none focus:border-[var(--yun-jade)] transition-colors"
                     placeholder="请输入您的收货地址"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-yun-text/50 tracking-wider mb-2">备注（选填）</label>
+                  <label className="block text-xs text-[var(--yun-gray)] tracking-wider mb-2">备注（选填）</label>
                   <textarea
                     value={form.remark}
                     onChange={(e) => setForm({ ...form, remark: e.target.value })}
                     rows={2}
-                    className="w-full px-4 py-3 border border-yun rounded-brand bg-transparent text-sm focus:outline-none focus:border-yun-accent transition-colors resize-none"
+                    className="w-full px-4 py-3 border border-[var(--yun-border)] rounded-[var(--yun-radius)] bg-transparent text-sm text-[var(--yun-ink)] focus:outline-none focus:border-[var(--yun-jade)] transition-colors resize-none"
                     placeholder="如有特殊需求请在此说明"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="btn-primary w-full disabled:opacity-50"
+                  className="w-full px-8 py-3 bg-[var(--yun-ink)] text-[var(--yun-paper)] text-sm tracking-wider rounded-[var(--yun-radius-pill)] hover:bg-[var(--yun-jade)] disabled:opacity-50 transition-all duration-300"
                 >
                   {submitting ? '提交中...' : '确认获取'}
                 </button>
@@ -187,7 +203,7 @@ function CheckoutContent() {
             </div>
           )}
         </div>
-      </section>
-    </>
+      </SectionWrapper>
+    </main>
   );
 }

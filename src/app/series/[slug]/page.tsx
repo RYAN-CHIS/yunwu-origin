@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import { Metadata } from 'next';
+import SectionWrapper from '@/components/ui/SectionWrapper';
+import ProductCard from '@/components/ui/ProductCard';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -60,75 +62,67 @@ export default async function SeriesPage({ params }: Props) {
   const extra = seriesConstitution[series.slug];
 
   return (
-    <>
+    <main className="bg-[var(--yun-paper)] min-h-screen">
       {/* Hero */}
-      <section className="min-h-[60vh] flex items-center justify-center pt-16">
-        <div className="text-center max-w-2xl px-6">
-          <p className="text-xs text-yun-accent tracking-[0.2em] mb-4">
+      <SectionWrapper className="min-h-[50vh] flex items-center justify-center">
+        <div className="text-center max-w-2xl fade-in">
+          <p className="text-xs text-[var(--yun-jade)] tracking-[0.2em] mb-4">
             第{chineseOrdinals[series.sortOrder - 1]}序{extra ? ` · ${extra.subtitle}` : ''}
           </p>
-          <h1 className="text-4xl md:text-5xl font-light tracking-[0.12em] mb-6">
+          <h1 className="text-4xl md:text-5xl font-light tracking-[0.12em] text-[var(--yun-ink)] mb-6">
             {series.name}
           </h1>
           <div className="divider mb-8" />
-          <p className="text-lg font-light tracking-wider text-yun-accent/80 mb-4 leading-relaxed italic">
+          <p className="text-lg font-light tracking-wider text-[var(--yun-jade)]/80 mb-4 leading-relaxed italic">
             「{series.heroText}」
           </p>
-          <p className="text-sm text-yun-text/60 leading-loose max-w-xl mx-auto">
+          <p className="text-sm text-[var(--yun-gray)] leading-loose max-w-xl mx-auto">
             {series.description}
           </p>
           {extra && (
             <div className="mt-6 flex flex-col gap-2 items-center">
-              <p className="text-xs text-yun-accent/50 tracking-wider">{extra.keywords}</p>
-              <p className="text-[11px] text-yun-border tracking-wider">
+              <p className="text-xs text-[var(--yun-jade)]/50 tracking-wider">{extra.keywords}</p>
+              <p className="text-[11px] text-[var(--yun-gray)] tracking-wider">
                 作品体系：{extra.works}
               </p>
             </div>
           )}
         </div>
-      </section>
+      </SectionWrapper>
 
       {/* 作品列表 */}
-      <section className="py-20">
-        <div className="container-brand">
-          <h2 className="text-center text-sm font-light tracking-[0.15em] text-yun-text/40 mb-12">
-            {series.name} · 作品
-          </h2>
+      <SectionWrapper>
+        <h2 className="text-center text-sm font-light tracking-[0.15em] text-[var(--yun-gray)] mb-12">
+          {series.name} · 作品
+        </h2>
 
-          {series.products.length === 0 ? (
-            <p className="text-center text-sm text-yun-text/40">作品筹备中</p>
-          ) : (
-            <div className="grid md:grid-cols-4 gap-8">
-              {series.products.map((p) => (
-                <Link
-                  key={p.id}
-                  href={`/products/${p.slug}`}
-                  className="group"
-                >
-                  <div className="aspect-[3/4] bg-yun-grey/20 rounded-brand mb-4 flex items-center justify-center">
-                    <span className="text-6xl font-display text-yun-text/20 group-hover:text-yun-accent/30 transition-colors">
-                      {p.name.charAt(0)}
-                    </span>
-                  </div>
-                  <h3 className="text-base font-light tracking-wider mb-1 group-hover:text-yun-accent transition-colors">
-                    {p.name}
-                  </h3>
-                  <p className="text-xs text-yun-text/40 mb-2 line-clamp-2">{p.theme}</p>
-                  <p className="text-sm text-yun-text/50">¥{p.salePrice.toLocaleString()}</p>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+        {series.products.length === 0 ? (
+          <p className="text-center text-sm text-[var(--yun-gray)]">作品筹备中</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            {series.products.map((p) => (
+              <ProductCard
+                key={p.id}
+                slug={p.slug}
+                name={p.name}
+                coverImage={p.coverImage}
+                seriesName={series.name}
+                seriesSlug={series.slug}
+                salePrice={p.salePrice}
+                objectCategory={p.objectCategory}
+              />
+            ))}
+          </div>
+        )}
+      </SectionWrapper>
 
       {/* 返回导航 */}
-      <div className="text-center pb-20">
-        <Link href="/" className="text-sm text-yun-accent tracking-wider hover:opacity-70 transition-opacity">
-          ← 返回首页
+      <div className="text-center pb-24">
+        <Link href="/series" className="text-sm text-[var(--yun-jade)] tracking-wider hover:opacity-70 transition-opacity">
+          ← 返回七序总览
         </Link>
       </div>
-    </>
+    </main>
   );
 }
 

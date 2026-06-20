@@ -9,9 +9,6 @@ export default withAuth(
     callbacks: {
       authorized: ({ token }) => !!token,
     },
-    pages: {
-      signIn: "/admin/login",
-    },
   }
 );
 

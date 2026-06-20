@@ -59,11 +59,21 @@ export default function AdminSettingsPage() {
     setUsers(u);
   }
 
-  const textStyle = { color: "var(--yun-text)" };
-  const subStyle = { color: "var(--yun-subtext)" };
-  const lineStyle = { borderColor: "var(--yun-line)" };
+const ROLE_OPTIONS = [
+  { value: "SUPER_ADMIN", label: "超级管理员", desc: "全部权限" },
+  { value: "ADMIN", label: "管理员", desc: "除系统设置外全部权限" },
+  { value: "OPERATOR", label: "运营", desc: "内容、订单、图片库" },
+  { value: "STORE_MANAGER", label: "店长", desc: "订单管理、库存查看" },
+  { value: "EDITOR", label: "编辑", desc: "仅品牌志内容" },
+] as const;
 
-  return (
+const ROLE_MAP: Record<string, string> = Object.fromEntries(
+  ROLE_OPTIONS.map((r) => [r.value, r.label])
+);
+
+const textStyle = { color: "var(--yun-text)" };
+const subStyle = { color: "var(--yun-subtext)" };
+const lineStyle = { borderColor: "var(--yun-line)" };
     <div>
       <h1 className="text-xl font-medium tracking-[0.1em] mb-6" style={textStyle}>系统设置</h1>
 
@@ -98,7 +108,7 @@ export default function AdminSettingsPage() {
                 <div key={u.id} className="flex items-center justify-between py-1.5 border-b last:border-0" style={lineStyle}>
                   <div>
                     <p className="text-sm" style={textStyle}>{u.name}</p>
-                    <p className="text-xs" style={subStyle}>{u.email} · {u.role}</p>
+                    <p className="text-xs" style={subStyle}>{u.email} · {ROLE_MAP[u.role] || u.role}</p>
                   </div>
                   {u.role !== "SUPER_ADMIN" && (
                     <button onClick={() => handleDeleteUser(u.id)}
@@ -134,8 +144,9 @@ export default function AdminSettingsPage() {
                   <label className="block text-xs mb-0.5" style={subStyle}>角色</label>
                   <select value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
                     className="w-full px-3 py-1.5 border text-sm bg-white" style={lineStyle}>
-                    <option value="ADMIN">ADMIN</option>
-                    <option value="EDITOR">EDITOR</option>
+                    {ROLE_OPTIONS.map((r) => (
+                      <option key={r.value} value={r.value}>{r.label} — {r.desc}</option>
+                    ))}
                   </select>
                 </div>
               </div>

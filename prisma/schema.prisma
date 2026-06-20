@@ -25,9 +25,11 @@ model AdminUser {
 }
 
 enum AdminRole {
-  SUPER_ADMIN
-  ADMIN
-  EDITOR
+  SUPER_ADMIN    // 超级管理员 — 全部权限
+  ADMIN           // 管理员 — 除系统设置外的全部权限
+  OPERATOR        // 运营 — 内容管理、订单管理、图片库
+  STORE_MANAGER   // 店长 — 订单管理、库存查看
+  EDITOR          // 编辑 — 仅内容编辑（品牌志）
 }
 
 // ═══════════════════════════════════════════════════════

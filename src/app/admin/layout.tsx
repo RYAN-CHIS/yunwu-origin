@@ -2,9 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
-const navItems = [
+// ── 角色 → 可见菜单路径 ──
+const PERMISSIONS: Record<string, string[]> = {
+  SUPER_ADMIN:  ["/admin"],
+  ADMIN:           ["/admin"],
+  OPERATOR:       ["/admin", "/admin/series", "/admin/objects", "/admin/materials", "/admin/journal", "/admin/products", "/admin/media", "/admin/leads"],
+  STORE_MANAGER:  ["/admin", "/admin/products", "/admin/leads"],
+  EDITOR:         ["/admin", "/admin/journal"],
+};
+
+const allNavItems = [
   { label: "仪表盘", href: "/admin" },
   { label: "品牌资产", items: [
     { label: "七序体系", href: "/admin/series" },
@@ -21,8 +30,26 @@ const navItems = [
   { label: "系统设置", href: "/admin/settings" },
 ];
 
+/** 根据角色过滤侧边栏菜单 */
+function filterNavItems(role: string) {
+  const allowed = PERMISSIONS[role] || ["/admin"];
+  return allNavItems
+    .map((item) => {
+      if ("items" in item && item.items) {
+        const filtered = item.items.filter((sub) => allowed.includes(sub.href));
+        if (filtered.length === 0) return null;
+        return { ...item, items: filtered };
+      }
+      return allowed.includes(item.href) ? item : null;
+    })
+    .filter(Boolean);
+}
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const role = (session?.user as any)?.role || "ADMIN";
+  const navItems = filterNavItems(role);
 
   // 登录页不渲染管理后台框架（侧边栏）
   if (pathname === "/admin/login") {

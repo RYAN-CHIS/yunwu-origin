@@ -30,18 +30,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 function Navbar() {
   const links = [
     { href: '/', label: '首页' },
+    { href: '/series', label: '七序' },
     { href: '/objects', label: '器物' },
-    { href: '/series/fuchu', label: '七序' },
     { href: '/journal', label: '品牌志' },
     { href: '/about', label: '关于允物' },
-    { href: '/contact', label: '联系允物' },
+    { href: '/contact', label: '同行者' },
   ];
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-yun-white/95 backdrop-blur-sm border-b border-yun">
       <div className="container-brand flex items-center justify-between h-16">
-        <Link href="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="允物 Yunwu" className="h-8 w-auto" />
+        <Link href="/" className="flex items-center gap-3 group">
+          <img src="/logo-icon.png" alt="允物" className="h-8 w-auto opacity-90 group-hover:opacity-100 transition-opacity" />
+          <span className="text-2xl font-light tracking-[0.25em] text-yun-text">允物</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-10">
@@ -77,8 +78,9 @@ function Footer() {
         <div className="grid md:grid-cols-3 gap-10">
           {/* 品牌信息 */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <img src="/logo.png" alt="允物 Yunwu" className="h-8 w-auto opacity-80" />
+            <div className="flex items-center gap-3 mb-4">
+              <img src="/logo-icon.png" alt="允物" className="h-8 w-auto opacity-70" />
+              <span className="text-2xl font-light tracking-[0.25em] text-yun-white/80">允物</span>
             </div>
             <p className="text-sm leading-relaxed opacity-70 mt-4">
               以东方文化为根，<br />
@@ -91,12 +93,12 @@ function Footer() {
           <div>
             <h4 className="text-yun-white text-sm tracking-widest mb-4">探索</h4>
             <div className="grid grid-cols-2 gap-2 text-sm opacity-70">
+              <Link href="/series" className="hover:text-yun-white transition-colors">七序体系</Link>
               <Link href="/objects" className="hover:text-yun-white transition-colors">东方器物</Link>
-              <Link href="/series/fuchu" className="hover:text-yun-white transition-colors">七序体系</Link>
               <Link href="/journal" className="hover:text-yun-white transition-colors">品牌志</Link>
               <Link href="/materials" className="hover:text-yun-white transition-colors">材料研究</Link>
               <Link href="/about" className="hover:text-yun-white transition-colors">关于允物</Link>
-              <Link href="/contact" className="hover:text-yun-white transition-colors">联系允物</Link>
+              <Link href="/contact" className="hover:text-yun-white transition-colors">同行者社群</Link>
             </div>
           </div>
 

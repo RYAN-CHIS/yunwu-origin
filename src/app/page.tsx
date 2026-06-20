@@ -1,310 +1,394 @@
 import Link from 'next/link';
 import prisma from '@/lib/prisma';
 
-// 六大器物门类
-const objectCategories = [
+// ── 五大器物体系（来自《允物品牌宪章》）──
+const objectSystems = [
   {
-    key: 'BRACELET',
-    name: '珠串',
-    english: 'Bracelets',
-    desc: '人与材质的关系',
-    icon: '○',
+    name: '见己',
+    subtitle: '关于陪伴自己',
+    items: ['手串', '佩饰', '瓷珠', '香牌'],
+    desc: '相伴于身，照见本心。器物不是答案，而是提醒我们看见自己的镜子。',
   },
   {
-    key: 'INCENSE',
-    name: '香器',
-    english: 'Incense Objects',
-    desc: '人与气味的关系',
-    icon: '△',
+    name: '留痕',
+    subtitle: '关于表达自己',
+    items: ['姓名章', '闲章', '品牌章', '篆刻'],
+    desc: '以刀为笔，以石为纸。每一次落刀，都是与时间的对话。',
   },
   {
-    key: 'SEAL',
-    name: '印章',
-    english: 'Seals',
-    desc: '人与文字的关系',
-    icon: '□',
+    name: '栖居',
+    subtitle: '关于安顿生活',
+    items: ['茶器', '香器', '花器', '文房'],
+    desc: '烟火日常，亦有诗意。器物让空间成为家，让片刻成为仪式。',
   },
   {
-    key: 'CERAMIC',
-    name: '瓷器',
-    english: 'Ceramics',
-    desc: '人与日常的关系',
-    icon: '◇',
+    name: '随行',
+    subtitle: '关于长期陪伴',
+    items: ['皮具', '卡包', '护照夹', '手账'],
+    desc: '陪我们走过日常的，才是真正重要的。使用是最好的养护。',
   },
   {
-    key: 'ENAMEL',
-    name: '珐琅',
-    english: 'Enamel',
-    desc: '人与工艺的关系',
-    icon: '☆',
-  },
-  {
-    key: 'SCHOLAR',
-    name: '文房',
-    english: 'Scholar Objects',
-    desc: '人与精神空间的关系',
-    icon: '一',
+    name: '传藏',
+    subtitle: '关于时间价值',
+    items: ['大漆', '掐丝珐琅', '编号作品'],
+    desc: '有些器物，生来就是为了被传递。它们承载时间，也承载故事。',
   },
 ];
 
+// ── 工艺体系（来自《允物品牌宪章》）──
+const crafts = [
+  { name: '篆刻', desc: '记录名字，记录身份，记录人与时间的关系', icon: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5' },
+  { name: '瓷器', desc: '泥土经火，成为器物。时间与温度共同完成', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
+  { name: '大漆', desc: '与时间合作的工艺，等待本身就是创造', icon: 'M12 2a7 7 0 017 7c0 2.4-1.2 4.5-3 5.7V17a2 2 0 01-2 2h-1a2 2 0 01-2-2v-2.3A6.98 6.98 0 015 9a7 7 0 017-7z' },
+  { name: '掐丝珐琅', desc: '金属与釉彩相遇，代表慢工艺的价值', icon: 'M4 6h16M4 12h16M4 18h16M8 2v4M16 2v4M8 16v4M16 16v4' },
+  { name: '皮具', desc: '记录使用痕迹，形成独属的时间纹路', icon: 'M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9zM13 2v7h7' },
+];
+
+// ── 精选作品分类映射 ──
+const featuredCategories = [
+  { key: 'BRACELET', name: '手串', slug: 'bracelet' },
+  { key: 'SEAL', name: '篆刻', slug: 'seal' },
+  { key: 'CERAMIC', name: '瓷器', slug: 'ceramic' },
+  { key: 'INCENSE', name: '香器', slug: 'incense' },
+  { key: 'ENAMEL', name: '珐琅', slug: 'enamel' },
+] as const;
+
 export default async function HomePage() {
-  const series = await prisma.series.findMany({ orderBy: { sortOrder: 'asc' } });
-  const featured = await prisma.product.findMany({
-    where: { status: 'published' },
-    include: { series: true },
-    take: 8,
-    orderBy: { createdAt: 'desc' },
+  const journalPosts = await prisma.journalPost.findMany({
+    where: { status: 'PUBLISHED' },
+    take: 3,
+    orderBy: { publishedAt: 'desc' },
   });
-  const materials = await prisma.material.findMany({ take: 6 });
+
+  // 按分类获取精选作品（每类 2 件）
+  const featuredByCategory = await Promise.all(
+    featuredCategories.map(async (cat) => {
+      const products = await prisma.product.findMany({
+        where: { status: 'published', objectCategory: cat.key as any },
+        include: { series: true },
+        take: 2,
+        orderBy: { createdAt: 'desc' },
+      });
+      return { ...cat, products };
+    })
+  );
+
+  // 只展示有作品的分类
+  const visibleCategories = featuredByCategory.filter((c) => c.products.length > 0);
 
   return (
     <>
-      {/* ═══ Hero ═══ */}
+      {/* ═══════════════════════════════════════════════════════
+          第一屏：Hero
+          ═══════════════════════════════════════════════════════ */}
       <section className="min-h-screen flex items-center justify-center relative pt-16">
         <div className="text-center px-6 max-w-3xl fade-in">
-          <p className="font-display text-7xl md:text-9xl text-yun-accent/15 tracking-widest leading-none mb-6">
-            ORIGIN
-          </p>
-          <h1 className="text-3xl md:text-4xl font-light tracking-[0.15em] text-yun-text mb-4">
-            允物
+          {/* 品牌主张 */}
+          <h1 className="text-3xl md:text-5xl font-light tracking-[0.15em] text-yun-text mb-6 leading-normal">
+            让物归物<br />让心归心
           </h1>
+
+          <p className="text-base md:text-lg font-light tracking-[0.12em] text-yun-accent mb-4">
+            东方生活器物品牌
+          </p>
+
           <div className="divider mb-8" />
-          <p className="text-xl md:text-2xl font-light tracking-[0.12em] text-yun-text/80 mb-2">
-            器以载道
-          </p>
-          <p className="text-xl md:text-2xl font-light tracking-[0.12em] text-yun-text/80 mb-10">
-            物以见心
-          </p>
+
           <p className="text-sm text-yun-text/50 tracking-wider max-w-md mx-auto leading-loose mb-12">
-            以东方文化为根，<br />
-            以器物回应当代人的精神生活。<br />
-            让物归物，让心归心。
+            通过器物重新建立人与自己、<br />
+            人与时间、人与生活的连接。
           </p>
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/objects" className="btn-primary">
-              探索器物
+              浏览作品
             </Link>
-            <Link href="/series/fuchu" className="btn-outline">
+            <Link href="/series" className="btn-outline">
               进入七序
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ═══ 东方器物体系 ═══ */}
-      <section className="py-24 bg-yun-white">
-        <div className="container-brand">
-          <div className="text-center mb-16">
-            <p className="font-display text-lg text-yun-accent/60 tracking-[0.2em] mb-2">Eastern Objects</p>
-            <h2 className="text-2xl font-light tracking-[0.15em]">东方器物</h2>
-            <div className="divider mt-6" />
-            <p className="text-sm text-yun-text/50 mt-6 max-w-xl mx-auto leading-loose">
-              器物不仅被使用，<br />
-              也被观看、触摸、陪伴与记忆。
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-px bg-yun-grey/20">
-            {objectCategories.map((cat) => (
-              <Link
-                key={cat.key}
-                href={`/objects?category=${cat.key}`}
-                className="group bg-yun-white p-8 md:p-10 hover:bg-yun-bg/60 transition-colors text-center"
-              >
-                <div className="text-3xl md:text-4xl text-yun-accent/30 group-hover:text-yun-accent/60 transition-colors mb-5 font-light">
-                  {cat.icon}
-                </div>
-                <h3 className="text-lg font-light tracking-[0.12em] mb-1 group-hover:text-yun-accent transition-colors">
-                  {cat.name}
-                </h3>
-                <p className="text-xs text-yun-text/40 tracking-widest mb-3">{cat.english}</p>
-                <p className="text-xs text-yun-text/50 leading-relaxed">{cat.desc}</p>
-              </Link>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <Link href="/objects" className="btn-outline">
-              进入器物中心
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ 七序世界观 ═══ */}
+      {/* ═══════════════════════════════════════════════════════
+          第二屏：精选作品
+          ═══════════════════════════════════════════════════════ */}
       <section className="py-24">
         <div className="container-brand">
           <div className="text-center mb-16">
-            <p className="font-display text-lg text-yun-accent/60 tracking-[0.2em] mb-2">The Seven States</p>
-            <h2 className="text-2xl font-light tracking-[0.15em]">七序世界观</h2>
-            <div className="divider mt-6" />
-            <p className="text-sm text-yun-text/50 mt-6 max-w-xl mx-auto leading-loose">
-              七序不是产品分类，而是七种人生状态。<br />
-              没有绝对高低，只是不断循环往复。
+            <h2 className="text-2xl md:text-3xl font-light tracking-[0.15em] mb-4">精选作品</h2>
+            <p className="text-sm text-yun-text/50 max-w-xl mx-auto leading-loose">
+              每一件器物，都承载着材料、工艺与时间的温度。
             </p>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-px bg-yun-grey/30">
-            {series.slice(0, 4).map((s) => (
-              <Link
-                key={s.id}
-                href={`/series/${s.slug}`}
-                className="group bg-yun-white p-8 hover:bg-yun-white/50 transition-colors"
-              >
-                <p className="text-xs text-yun-accent tracking-[0.15em] mb-3">
-                  {String(s.sortOrder).padStart(2, '0')}
-                </p>
-                <h3 className="text-xl font-light tracking-wider mb-2 group-hover:text-yun-accent transition-colors">
-                  {s.name}
-                </h3>
-                <p className="text-sm text-yun-text/50 leading-relaxed line-clamp-3">
-                  {s.description.split('。')[0]}。
-                </p>
-              </Link>
-            ))}
-          </div>
-          <div className="grid md:grid-cols-3 gap-px bg-yun-grey/30">
-            {series.slice(4).map((s) => (
-              <Link
-                key={s.id}
-                href={`/series/${s.slug}`}
-                className="group bg-yun-white p-8 hover:bg-yun-white/50 transition-colors"
-              >
-                <p className="text-xs text-yun-accent tracking-[0.15em] mb-3">
-                  {String(s.sortOrder).padStart(2, '0')}
-                </p>
-                <h3 className="text-xl font-light tracking-wider mb-2 group-hover:text-yun-accent transition-colors">
-                  {s.name}
-                </h3>
-                <p className="text-sm text-yun-text/50 leading-relaxed line-clamp-3">
-                  {s.description.split('。')[0]}。
-                </p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ 当季器物 ═══ */}
-      <section className="py-24 bg-yun-white">
-        <div className="container-brand">
-          <div className="text-center mb-16">
-            <p className="font-display text-lg text-yun-accent/60 tracking-[0.2em] mb-2">Current Season</p>
-            <h2 className="text-2xl font-light tracking-[0.15em]">当季器物</h2>
-            <div className="divider mt-6" />
-          </div>
-
-          <div className="grid md:grid-cols-4 gap-8">
-            {featured.map((p) => (
-              <Link
-                key={p.id}
-                href={`/products/${p.slug}`}
-                className="group"
-              >
-                {/* 占位封面 */}
-                <div className="aspect-[3/4] bg-yun-grey/20 rounded-brand mb-4 flex items-center justify-center overflow-hidden">
-                  <span className="text-yun-text/20 text-6xl font-display">
-                    {p.name.charAt(0)}
-                  </span>
-                </div>
-                <p className="text-xs text-yun-accent tracking-wider mb-1">{p.series.name}</p>
-                <h3 className="text-base font-light tracking-wider mb-1 group-hover:text-yun-accent transition-colors">
-                  {p.name}
-                </h3>
-                <p className="text-sm text-yun-text/50">
-                  ¥{p.salePrice.toLocaleString()}
-                </p>
-              </Link>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <Link href="/objects" className="btn-outline">
-              浏览全部器物
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ 为什么是器物 ═══ */}
-      <section className="py-24 bg-yun-dark text-yun-grey">
-        <div className="container-brand max-w-3xl text-center">
-          <p className="font-display text-lg text-yun-accent tracking-[0.2em] mb-2">Why Objects</p>
-          <h2 className="text-2xl font-light tracking-[0.15em] text-yun-white mb-10">为什么是器物</h2>
-          <div className="space-y-6 text-sm leading-loose opacity-80">
-            <p>器物无法改变命运。</p>
-            <p>
-              它不能替我们做决定，<br />
-              不能替我们承担责任。
-            </p>
-            <p>但器物可以陪伴。</p>
-            <p className="text-yun-accent/80">
-              在一次次使用中，<br />
-              提醒我们看见自己。
-            </p>
-            <p>
-              允物希望重新建立一种真实、<br />
-              克制且有温度的人与物的关系。
-            </p>
-          </div>
-          <div className="mt-10">
-            <Link href="/about" className="btn-outline border-yun-grey text-yun-grey hover:bg-yun-grey hover:text-yun-dark">
-              了解允物
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ 材料研究 ═══ */}
-      <section className="py-24">
-        <div className="container-brand">
-          <div className="text-center mb-16">
-            <p className="font-display text-lg text-yun-accent/60 tracking-[0.2em] mb-2">Material Studies</p>
-            <h2 className="text-2xl font-light tracking-[0.15em]">材料研究</h2>
-            <div className="divider mt-6" />
-            <p className="text-sm text-yun-text/50 mt-6 max-w-xl mx-auto leading-loose">
-              材料不是主角，器物才是。<br />
-              但每一种材料都有它的来历、性格与故事。
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-6 gap-4">
-            {materials.map((m) => (
-              <div key={m.id} className="text-center group">
-                <div className="aspect-square bg-yun-grey/10 rounded-brand mb-3 flex items-center justify-center hover:bg-yun-grey/20 transition-colors">
-                  <span className="text-4xl font-display text-yun-accent/20 group-hover:text-yun-accent/40 transition-colors">
-                    {m.name.charAt(0)}
-                  </span>
-                </div>
-                <h3 className="text-sm font-light tracking-wider mb-1">{m.name}</h3>
-                <p className="text-xs text-yun-text/40 tracking-wider">{m.type}</p>
+          {visibleCategories.map((cat) => (
+            <div key={cat.key} className="mb-16 last:mb-0">
+              <div className="flex items-center gap-4 mb-8">
+                <h3 className="text-lg font-light tracking-[0.12em] text-yun-text">{cat.name}</h3>
+                <div className="flex-1 h-px bg-yun-grey/20" />
+                <Link
+                  href={`/objects?category=${cat.key}`}
+                  className="text-xs text-yun-accent/60 hover:text-yun-accent tracking-wider transition-colors"
+                >
+                  查看全部 →
+                </Link>
               </div>
+
+              <div className="grid md:grid-cols-2 gap-8">
+                {cat.products.map((p) => (
+                  <Link key={p.id} href={`/products/${p.slug}`} className="group flex gap-6">
+                    {/* 作品封面 */}
+                    <div className="w-24 h-32 md:w-32 md:h-40 bg-yun-grey/10 flex-shrink-0 flex items-center justify-center overflow-hidden border border-yun-grey/10 group-hover:border-yun-grey/30 transition-colors">
+                      {p.coverImage ? (
+                        <img src={p.coverImage} alt={p.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-yun-text/15 text-4xl font-display">{p.name.charAt(0)}</span>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col justify-center">
+                      <p className="text-xs text-yun-accent tracking-wider mb-1">{p.series.name}</p>
+                      <h4 className="text-base font-light tracking-wider mb-1 group-hover:text-yun-accent transition-colors">
+                        {p.name}
+                      </h4>
+                      {p.theme && (
+                        <p className="text-xs text-yun-text/40 mb-2 line-clamp-2">{p.theme}</p>
+                      )}
+                      {p.story && (
+                        <p className="text-xs text-yun-text/50 line-clamp-2 leading-relaxed mb-2">
+                          {p.story.slice(0, 60)}...
+                        </p>
+                      )}
+                      <p className="text-sm text-yun-text/60 font-light">
+                        ¥{p.salePrice.toLocaleString()}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          第四屏：五大器物体系
+          ═══════════════════════════════════════════════════════ */}
+      <section className="py-24 bg-yun-white">
+        <div className="container-brand">
+          <div className="text-center mb-16">
+            <h2 className="text-2xl md:text-3xl font-light tracking-[0.15em] mb-3">
+              我们不以品类定义品牌
+            </h2>
+            <p className="text-lg font-light tracking-[0.12em] text-yun-accent">
+              而以人与器物的关系定义
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-5 gap-4">
+            {objectSystems.map((sys) => (
+              <Link
+                key={sys.name}
+                href={`/objects?system=${sys.name}`}
+                className="bg-white/70 p-6 md:p-8 border border-yun-grey/10 hover:border-yun-grey/20 hover:shadow-sm transition-all text-center block"
+              >
+                <h3 className="text-xl md:text-2xl font-light tracking-widest mb-3 text-yun-text">
+                  {sys.name}
+                </h3>
+                <p className="text-xs text-yun-accent tracking-wider mb-4">{sys.subtitle}</p>
+                <p className="text-xs text-yun-text/50 leading-relaxed mb-4">{sys.desc}</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {sys.items.map((item) => (
+                    <span key={item} className="tag-yun text-[10px]">{item}</span>
+                  ))}
+                </div>
+              </Link>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          第五屏：品牌原则（三不原则精简版）
+          ═══════════════════════════════════════════════════════ */}
+      <section className="py-24">
+        <div className="container-brand max-w-4xl">
+          <div className="text-center mb-16">
+            <h2 className="text-2xl md:text-3xl font-light tracking-[0.15em] mb-4">允物三不原则</h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <Link href="/about#principles" className="text-center p-10 bg-yun-white border border-yun-grey/10 hover:border-yun-grey/20 hover:shadow-sm transition-all block">
+              <h3 className="text-xl font-light tracking-wider mb-4 text-yun-text">不承诺</h3>
+              <p className="text-sm text-yun-text/50 leading-loose">
+                不承诺招财。<br />
+                不承诺转运。<br />
+                不承诺改命。
+              </p>
+            </Link>
+            <Link href="/about#principles" className="text-center p-10 bg-yun-white border border-yun-grey/10 hover:border-yun-grey/20 hover:shadow-sm transition-all block">
+              <h3 className="text-xl font-light tracking-wider mb-4 text-yun-text">不否定</h3>
+              <p className="text-sm text-yun-text/50 leading-loose">
+                不否定传统文化。<br />
+                不否定民间信仰。<br />
+                不否定人与器物之间的情感连接。
+              </p>
+            </Link>
+            <Link href="/about#principles" className="text-center p-10 bg-yun-white border border-yun-grey/10 hover:border-yun-grey/20 hover:shadow-sm transition-all block">
+              <h3 className="text-xl font-light tracking-wider mb-4 text-yun-text">不利用</h3>
+              <p className="text-sm text-yun-text/50 leading-loose">
+                不利用恐惧销售。<br />
+                不利用焦虑销售。<br />
+                不利用命运不安销售。
+              </p>
+            </Link>
           </div>
 
           <div className="text-center mt-10">
-            <Link href="/materials" className="btn-outline">
-              材料知识库
+            <Link href="/about#ethics" className="btn-outline text-sm">
+              阅读完整商业伦理 →
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ═══ 品牌志预览 ═══ */}
-      <section className="py-24 bg-yun-white border-t border-yun-grey/20">
+      {/* ═══════════════════════════════════════════════════════
+          第六屏：品牌故事（精简版）
+          ═══════════════════════════════════════════════════════ */}
+      <section className="py-24 bg-yun-dark">
+        <Link href="/about" className="block container-brand max-w-3xl">
+          <div className="text-center">
+            <h2 className="text-2xl md:text-3xl font-light tracking-[0.15em] text-yun-white mb-8">
+              允物不是一个关于产品的品牌
+            </h2>
+            <p className="text-sm text-yun-grey/70 leading-loose max-w-2xl mx-auto mb-6">
+              允物是一个关于人与器物关系的品牌。<br />
+              我们不试图让器物承担本不属于它的责任——不让珠子背负改变命运的神话，不让木头成为身份焦虑的证明，不让消费变成自我价值的确认。我们希望重新建立一种真实、克制且有温度的人与物的关系。<br />
+              让物归物。让心归心。这便是允物存在的意义。
+            </p>
+            <span className="text-xs text-yun-accent/60 hover:text-yun-accent tracking-wider transition-colors">
+              了解更多品牌故事 →
+            </span>
+          </div>
+        </Link>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          第七屏：工艺体系
+          ═══════════════════════════════════════════════════════ */}
+      <section className="py-24">
         <div className="container-brand">
-          <div className="text-center mb-12">
-            <p className="font-display text-lg text-yun-accent/60 tracking-[0.2em] mb-2">Journal</p>
-            <h2 className="text-2xl font-light tracking-[0.15em]">品牌志</h2>
-            <div className="divider mt-6" />
-            <p className="text-sm text-yun-text/50 mt-6 max-w-xl mx-auto leading-loose">
-              器物之道，不在拥有，而在观照。
+          <div className="text-center mb-16">
+            <h2 className="text-2xl md:text-3xl font-light tracking-[0.15em] mb-4">工艺体系</h2>
+            <p className="text-sm text-yun-text/50 max-w-xl mx-auto leading-loose">
+              器物的价值，不仅来自材料本身，还来自时间、经验与双手。
             </p>
           </div>
-          <div className="text-center">
-            <Link href="/journal" className="btn-outline">
-              阅读品牌志
+
+          <div className="grid md:grid-cols-5 gap-6">
+            {crafts.map((craft) => (
+              <Link
+                key={craft.name}
+                href={`/objects?craft=${craft.name}`}
+                className="text-center group block"
+              >
+                <div className="aspect-square bg-yun-white border border-yun-grey/10 mb-5 flex items-center justify-center group-hover:border-yun-grey/30 transition-colors">
+                  <svg className="w-12 h-12 text-yun-accent/20 group-hover:text-yun-accent/40 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                    <path d={craft.icon} />
+                  </svg>
+                </div>
+                <h3 className="text-base font-light tracking-wider mb-2 text-yun-text">{craft.name}</h3>
+                <p className="text-xs text-yun-text/50 leading-relaxed">{craft.desc}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          第八屏：品牌日志
+          ═══════════════════════════════════════════════════════ */}
+      <section className="py-24 bg-yun-white">
+        <div className="container-brand">
+          <div className="flex items-center justify-between mb-12">
+            <h2 className="text-2xl md:text-3xl font-light tracking-[0.15em]">品牌志</h2>
+            <Link href="/journal" className="text-xs text-yun-accent/60 hover:text-yun-accent tracking-wider transition-colors">
+              阅读全部 →
             </Link>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {journalPosts.map((post) => (
+              <Link key={post.id} href={`/journal/${post.slug}`} className="group">
+                {/* 封面占位 */}
+                <div className="aspect-[3/2] bg-yun-grey/10 mb-5 flex items-center justify-center overflow-hidden border border-yun-grey/10 group-hover:border-yun-grey/30 transition-colors">
+                  {post.coverImage ? (
+                    <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-yun-text/10 text-5xl font-display">{post.title.charAt(0)}</span>
+                  )}
+                </div>
+
+                <p className="text-xs text-yun-accent tracking-wider mb-2">
+                  {post.category === 'OBJECT' ? '器物'
+                    : post.category === 'MATERIAL' ? '材料'
+                    : post.category === 'CRAFT' ? '工艺'
+                    : post.category === 'DONGHAI' ? '东海'
+                    : post.category === 'CREATION' ? '创作'
+                    : '哲思'}
+                </p>
+                <h3 className="text-base font-light tracking-wider mb-2 group-hover:text-yun-accent transition-colors line-clamp-2">
+                  {post.title}
+                </h3>
+                {post.excerpt && (
+                  <p className="text-xs text-yun-text/50 leading-relaxed line-clamp-3">{post.excerpt}</p>
+                )}
+              </Link>
+            ))}
+          </div>
+
+          {/* 预留 CMS 接口说明 */}
+          <div className="mt-12 pt-8 border-t border-yun-grey/20 text-center">
+            <p className="text-xs text-yun-text/30 tracking-wider">
+              未来将接入 CMS 系统，支持动态内容管理
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          第九屏：社群入口
+          ═══════════════════════════════════════════════════════ */}
+      <section className="py-24">
+        <div className="container-brand">
+          <div className="text-center mb-16">
+            <h2 className="text-2xl md:text-3xl font-light tracking-[0.15em] mb-4">同行者</h2>
+            <p className="text-sm text-yun-text/50 max-w-xl mx-auto leading-loose">
+              活动的目的不是成交，而是建立人与人的连接。
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <Link href="/contact" className="text-center p-10 bg-yun-white border border-yun-grey/10 hover:border-yun-grey/20 hover:shadow-sm transition-all block">
+              <div className="text-4xl mb-4 text-yun-accent/20 font-light">栖</div>
+              <h3 className="text-lg font-light tracking-wider mb-2">栖迟雅集</h3>
+              <p className="text-xs text-yun-text/50 leading-relaxed">慢下来的聚会</p>
+            </Link>
+            <Link href="/contact" className="text-center p-10 bg-yun-white border border-yun-grey/10 hover:border-yun-grey/20 hover:shadow-sm transition-all block">
+              <div className="text-4xl mb-4 text-yun-accent/20 font-light">扶</div>
+              <h3 className="text-lg font-light tracking-wider mb-2">扶苏茶会</h3>
+              <p className="text-xs text-yun-text/50 leading-relaxed">生长的交流</p>
+            </Link>
+            <Link href="/contact" className="text-center p-10 bg-yun-white border border-yun-grey/10 hover:border-yun-grey/20 hover:shadow-sm transition-all block">
+              <div className="text-4xl mb-4 text-yun-accent/20 font-light">沧</div>
+              <h3 className="text-lg font-light tracking-wider mb-2">沧溟夜话</h3>
+              <p className="text-xs text-yun-text/50 leading-relaxed">格局的讨论</p>
+            </Link>
+          </div>
+
+          <div className="text-center mt-10">
+            <Link href="/contact" className="btn-outline">加入同行者社群</Link>
           </div>
         </div>
       </section>

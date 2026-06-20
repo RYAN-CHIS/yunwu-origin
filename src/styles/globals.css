@@ -38,8 +38,12 @@ body {
 .text-yun-text { color: var(--yun-text); }
 .text-yun-accent { color: var(--yun-accent); }
 .text-yun-grey { color: var(--yun-grey); }
+.text-yun-subtext { color: var(--yun-grey); }
 
 .border-yun { border-color: var(--yun-grey); }
+.border-yun-line { border-color: var(--yun-grey); }
+
+.bg-yun-bg { background-color: var(--yun-white); }
 
 /* ── 排版 ── */
 h1, h2, h3, h4 {

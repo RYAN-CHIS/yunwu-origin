@@ -1,21 +1,68 @@
 import Link from 'next/link';
 import prisma from '@/lib/prisma';
 
+// 六大器物门类
+const objectCategories = [
+  {
+    key: 'BRACELET',
+    name: '珠串',
+    english: 'Bracelets',
+    desc: '人与材质的关系',
+    icon: '○',
+  },
+  {
+    key: 'INCENSE',
+    name: '香器',
+    english: 'Incense Objects',
+    desc: '人与气味的关系',
+    icon: '△',
+  },
+  {
+    key: 'SEAL',
+    name: '印章',
+    english: 'Seals',
+    desc: '人与文字的关系',
+    icon: '□',
+  },
+  {
+    key: 'CERAMIC',
+    name: '瓷器',
+    english: 'Ceramics',
+    desc: '人与日常的关系',
+    icon: '◇',
+  },
+  {
+    key: 'ENAMEL',
+    name: '珐琅',
+    english: 'Enamel',
+    desc: '人与工艺的关系',
+    icon: '☆',
+  },
+  {
+    key: 'SCHOLAR',
+    name: '文房',
+    english: 'Scholar Objects',
+    desc: '人与精神空间的关系',
+    icon: '一',
+  },
+];
+
 export default async function HomePage() {
   const series = await prisma.series.findMany({ orderBy: { sortOrder: 'asc' } });
   const featured = await prisma.product.findMany({
     where: { status: 'published' },
     include: { series: true },
-    take: 20,
+    take: 8,
+    orderBy: { createdAt: 'desc' },
   });
-  const materials = await prisma.material.findMany({ take: 7 });
+  const materials = await prisma.material.findMany({ take: 6 });
 
   return (
     <>
       {/* ═══ Hero ═══ */}
       <section className="min-h-screen flex items-center justify-center relative pt-16">
         <div className="text-center px-6 max-w-3xl fade-in">
-          <p className="font-display text-7xl md:text-9xl text-yun-accent/20 tracking-widest leading-none mb-6">
+          <p className="font-display text-7xl md:text-9xl text-yun-accent/15 tracking-widest leading-none mb-6">
             ORIGIN
           </p>
           <h1 className="text-3xl md:text-4xl font-light tracking-[0.15em] text-yun-text mb-4">
@@ -29,20 +76,62 @@ export default async function HomePage() {
             物以见心
           </p>
           <p className="text-sm text-yun-text/50 tracking-wider max-w-md mx-auto leading-loose mb-12">
-            以东方文化为根，以天然材质为骨，以器物回应当代人的精神生活。
+            以东方文化为根，<br />
+            以器物回应当代人的精神生活。<br />
+            让物归物，让心归心。
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/series/fuchu" className="btn-primary">
-              进入七序
+            <Link href="/objects" className="btn-primary">
+              探索器物
             </Link>
-            <Link href="/products" className="btn-outline">
-              浏览作品
+            <Link href="/series/fuchu" className="btn-outline">
+              进入七序
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ═══ 七序介绍 ═══ */}
+      {/* ═══ 东方器物体系 ═══ */}
+      <section className="py-24 bg-yun-white">
+        <div className="container-brand">
+          <div className="text-center mb-16">
+            <p className="font-display text-lg text-yun-accent/60 tracking-[0.2em] mb-2">Eastern Objects</p>
+            <h2 className="text-2xl font-light tracking-[0.15em]">东方器物</h2>
+            <div className="divider mt-6" />
+            <p className="text-sm text-yun-text/50 mt-6 max-w-xl mx-auto leading-loose">
+              器物不仅被使用，<br />
+              也被观看、触摸、陪伴与记忆。
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-px bg-yun-grey/20">
+            {objectCategories.map((cat) => (
+              <Link
+                key={cat.key}
+                href={`/objects?category=${cat.key}`}
+                className="group bg-yun-white p-8 md:p-10 hover:bg-yun-bg/60 transition-colors text-center"
+              >
+                <div className="text-3xl md:text-4xl text-yun-accent/30 group-hover:text-yun-accent/60 transition-colors mb-5 font-light">
+                  {cat.icon}
+                </div>
+                <h3 className="text-lg font-light tracking-[0.12em] mb-1 group-hover:text-yun-accent transition-colors">
+                  {cat.name}
+                </h3>
+                <p className="text-xs text-yun-text/40 tracking-widest mb-3">{cat.english}</p>
+                <p className="text-xs text-yun-text/50 leading-relaxed">{cat.desc}</p>
+              </Link>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Link href="/objects" className="btn-outline">
+              进入器物中心
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 七序世界观 ═══ */}
       <section className="py-24">
         <div className="container-brand">
           <div className="text-center mb-16">
@@ -50,8 +139,8 @@ export default async function HomePage() {
             <h2 className="text-2xl font-light tracking-[0.15em]">七序世界观</h2>
             <div className="divider mt-6" />
             <p className="text-sm text-yun-text/50 mt-6 max-w-xl mx-auto leading-loose">
-              七序不是产品分类，而是七种人生状态。没有绝对高低，只是不断循环往复。
-              在七序中看到的，其实是不同阶段的自己。
+              七序不是产品分类，而是七种人生状态。<br />
+              没有绝对高低，只是不断循环往复。
             </p>
           </div>
 
@@ -96,12 +185,12 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ═══ 精选作品 ═══ */}
+      {/* ═══ 当季器物 ═══ */}
       <section className="py-24 bg-yun-white">
         <div className="container-brand">
           <div className="text-center mb-16">
-            <p className="font-display text-lg text-yun-accent/60 tracking-[0.2em] mb-2">Selected Works</p>
-            <h2 className="text-2xl font-light tracking-[0.15em]">精选作品</h2>
+            <p className="font-display text-lg text-yun-accent/60 tracking-[0.2em] mb-2">Current Season</p>
+            <h2 className="text-2xl font-light tracking-[0.15em]">当季器物</h2>
             <div className="divider mt-6" />
           </div>
 
@@ -130,67 +219,91 @@ export default async function HomePage() {
           </div>
 
           <div className="text-center mt-12">
-            <Link href="/products" className="btn-outline">
-              浏览全部作品
+            <Link href="/objects" className="btn-outline">
+              浏览全部器物
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ═══ 品牌故事 ═══ */}
+      {/* ═══ 为什么是器物 ═══ */}
       <section className="py-24 bg-yun-dark text-yun-grey">
         <div className="container-brand max-w-3xl text-center">
-          <p className="font-display text-lg text-yun-accent tracking-[0.2em] mb-2">Our Story</p>
-          <h2 className="text-2xl font-light tracking-[0.15em] text-yun-white mb-10">允物为何存在</h2>
+          <p className="font-display text-lg text-yun-accent tracking-[0.2em] mb-2">Why Objects</p>
+          <h2 className="text-2xl font-light tracking-[0.15em] text-yun-white mb-10">为什么是器物</h2>
           <div className="space-y-6 text-sm leading-loose opacity-80">
+            <p>器物无法改变命运。</p>
             <p>
-              我们生活在一个被过度包装的时代。越来越多的产品被赋予超出其本身的意义：一串珠子被承诺改变命运，一块木头被包装成身份象征，一件器物被讲述成遥不可及的传奇。
+              它不能替我们做决定，<br />
+              不能替我们承担责任。
             </p>
-            <p>
-              允物不试图让器物承担本不属于它的责任。不让一串珠子背负改变命运的神话，不让一块木头成为身份焦虑的证明，不让消费变成对自我价值的确认。
-            </p>
+            <p>但器物可以陪伴。</p>
             <p className="text-yun-accent/80">
-              我们只是希望：在这个一切都被过度包装的时代，重新建立一种真实、克制且有温度的人与物的关系。
+              在一次次使用中，<br />
+              提醒我们看见自己。
             </p>
-            <p>这便是允物存在的意义。</p>
+            <p>
+              允物希望重新建立一种真实、<br />
+              克制且有温度的人与物的关系。
+            </p>
           </div>
           <div className="mt-10">
             <Link href="/about" className="btn-outline border-yun-grey text-yun-grey hover:bg-yun-grey hover:text-yun-dark">
-              了解更多
+              了解允物
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ═══ 东方材料 ═══ */}
+      {/* ═══ 材料研究 ═══ */}
       <section className="py-24">
         <div className="container-brand">
           <div className="text-center mb-16">
-            <p className="font-display text-lg text-yun-accent/60 tracking-[0.2em] mb-2">Materials</p>
-            <h2 className="text-2xl font-light tracking-[0.15em]">东方材料</h2>
+            <p className="font-display text-lg text-yun-accent/60 tracking-[0.2em] mb-2">Material Studies</p>
+            <h2 className="text-2xl font-light tracking-[0.15em]">材料研究</h2>
             <div className="divider mt-6" />
             <p className="text-sm text-yun-text/50 mt-6 max-w-xl mx-auto leading-loose">
-              每一种材料都有它的来历、性格和故事。允物选择与天然材质同行，而非制造。
+              材料不是主角，器物才是。<br />
+              但每一种材料都有它的来历、性格与故事。
             </p>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-6 gap-4">
             {materials.map((m) => (
               <div key={m.id} className="text-center group">
-                <div className="aspect-square bg-yun-grey/10 rounded-brand mb-4 flex items-center justify-center">
-                  <span className="text-5xl font-display text-yun-accent/20 group-hover:text-yun-accent/40 transition-colors">
+                <div className="aspect-square bg-yun-grey/10 rounded-brand mb-3 flex items-center justify-center hover:bg-yun-grey/20 transition-colors">
+                  <span className="text-4xl font-display text-yun-accent/20 group-hover:text-yun-accent/40 transition-colors">
                     {m.name.charAt(0)}
                   </span>
                 </div>
-                <h3 className="text-base font-light tracking-wider mb-1">{m.name}</h3>
+                <h3 className="text-sm font-light tracking-wider mb-1">{m.name}</h3>
                 <p className="text-xs text-yun-text/40 tracking-wider">{m.type}</p>
               </div>
             ))}
           </div>
 
-          <div className="text-center mt-12">
+          <div className="text-center mt-10">
             <Link href="/materials" className="btn-outline">
-              探索全部材料
+              材料知识库
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 品牌志预览 ═══ */}
+      <section className="py-24 bg-yun-white border-t border-yun-grey/20">
+        <div className="container-brand">
+          <div className="text-center mb-12">
+            <p className="font-display text-lg text-yun-accent/60 tracking-[0.2em] mb-2">Journal</p>
+            <h2 className="text-2xl font-light tracking-[0.15em]">品牌志</h2>
+            <div className="divider mt-6" />
+            <p className="text-sm text-yun-text/50 mt-6 max-w-xl mx-auto leading-loose">
+              器物之道，不在拥有，而在观照。
+            </p>
+          </div>
+          <div className="text-center">
+            <Link href="/journal" className="btn-outline">
+              阅读品牌志
             </Link>
           </div>
         </div>

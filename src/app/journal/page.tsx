@@ -3,14 +3,15 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: '允物品牌志｜器物之道，不在拥有，而在观照',
-  description: '从东海到江南，从材料到哲思。允物品牌志记录东方器物美学的探索之路。',
+  description: '器物、材料、工艺、东海、创作、哲思。允物品牌志记录东方器物美学的探索之路。',
 }
 
 const categoryLabels: Record<string, string> = {
-  BRAND: '品牌',
-  MATERIAL: '材料',
-  JOURNEY: '旅途',
-  CRAFT: '创作',
+  OBJECT:     '器物',
+  MATERIAL:   '材料',
+  CRAFT:      '工艺',
+  DONGHAI:    '东海',
+  CREATION:   '创作',
   PHILOSOPHY: '哲思',
 }
 
@@ -52,6 +53,7 @@ export default async function JournalPage({
           <h1 className="font-display text-3xl md:text-4xl text-yun-text tracking-wide mb-6">
             允物品牌志
           </h1>
+          <div className="divider mt-0 mb-6" />
           <p className="text-lg md:text-xl text-yun-subtext leading-relaxed max-w-2xl mx-auto">
             器物之道，不在拥有，而在观照。
           </p>

@@ -3,12 +3,12 @@ import '@/styles/globals.css';
 
 // ── SEO Metadata ──
 export const metadata = {
-  title: '允物 ORIGIN｜东方器物与天然材质设计品牌',
+  title: '允物 ORIGIN｜东方器物品牌',
   description:
-    '允物是一家以东方文化为根基的器物品牌，通过七序世界观与天然材质作品，回应当代人的精神生活。让物归物，让心归心。',
+    '允物是一家东方器物品牌。以珠串、香器、印章、瓷器与诸般器物为媒介，重新建立人与物之间真实、克制且有温度的关系。',
   openGraph: {
-    title: '允物 ORIGIN｜东方器物与天然材质设计品牌',
-    description: '以东方文化为根，以天然材质为骨，以器物回应当代人的精神生活。',
+    title: '允物 ORIGIN｜东方器物品牌',
+    description: '以东方文化为根，以器物回应当代人的精神生活。让物归物，让心归心。',
     type: 'website' as const,
     locale: 'zh_CN',
   },
@@ -30,8 +30,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 function Navbar() {
   const links = [
     { href: '/', label: '首页' },
+    { href: '/objects', label: '器物' },
     { href: '/series/fuchu', label: '七序' },
-    { href: '/products', label: '作品' },
     { href: '/journal', label: '品牌志' },
     { href: '/about', label: '关于允物' },
     { href: '/contact', label: '联系允物' },
@@ -56,12 +56,13 @@ function Navbar() {
           ))}
         </div>
 
-        <div className="flex items-center gap-4">
-          <Link href="/checkout" className="relative text-yun-text/70 hover:text-yun-text transition-colors">
+        {/* 移动端汉堡菜单占位 */}
+        <div className="md:hidden flex items-center">
+          <button className="text-yun-text/70 hover:text-yun-text transition-colors">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0" />
+              <path d="M3 12h18M3 6h18M3 18h18" />
             </svg>
-          </Link>
+          </button>
         </div>
       </div>
     </nav>
@@ -77,12 +78,12 @@ function Footer() {
           {/* 品牌信息 */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <img src="/logo.png" alt="允物 Yunwu" className="h-8 w-auto" />
+              <img src="/logo.png" alt="允物 Yunwu" className="h-8 w-auto opacity-80" />
             </div>
-            <p className="text-sm leading-relaxed opacity-70">
+            <p className="text-sm leading-relaxed opacity-70 mt-4">
+              以东方文化为根，<br />
+              以器物回应当代人的精神生活。<br />
               让物归物，让心归心。
-              <br />
-              允许万物成为万物。
             </p>
           </div>
 
@@ -90,10 +91,10 @@ function Footer() {
           <div>
             <h4 className="text-yun-white text-sm tracking-widest mb-4">探索</h4>
             <div className="grid grid-cols-2 gap-2 text-sm opacity-70">
+              <Link href="/objects" className="hover:text-yun-white transition-colors">东方器物</Link>
               <Link href="/series/fuchu" className="hover:text-yun-white transition-colors">七序体系</Link>
-              <Link href="/products" className="hover:text-yun-white transition-colors">全部作品</Link>
               <Link href="/journal" className="hover:text-yun-white transition-colors">品牌志</Link>
-              <Link href="/materials" className="hover:text-yun-white transition-colors">东方材料</Link>
+              <Link href="/materials" className="hover:text-yun-white transition-colors">材料研究</Link>
               <Link href="/about" className="hover:text-yun-white transition-colors">关于允物</Link>
               <Link href="/contact" className="hover:text-yun-white transition-colors">联系允物</Link>
             </div>

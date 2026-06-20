@@ -3,10 +3,11 @@ import { redirect, notFound } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 
 const categories = [
-  { value: 'BRAND', label: '品牌' },
-  { value: 'MATERIAL', label: '材料' },
-  { value: 'JOURNEY', label: '旅途' },
-  { value: 'CRAFT', label: '创作' },
+  { value: 'OBJECT',     label: '器物' },
+  { value: 'MATERIAL',   label: '材料' },
+  { value: 'CRAFT',      label: '工艺' },
+  { value: 'DONGHAI',    label: '东海' },
+  { value: 'CREATION',   label: '创作' },
   { value: 'PHILOSOPHY', label: '哲思' },
 ]
 

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import '@/styles/globals.css';
+import { getSiteSettingValue } from '@/lib/actions/admin-actions';
 
 // ── SEO Metadata ──
 export const metadata = {
@@ -71,7 +72,14 @@ function Navbar() {
 }
 
 // ── 页脚 ──
-function Footer() {
+async function Footer() {
+  const [wechat, email, xiaohongshu, copyright, icp] = await Promise.all([
+    getSiteSettingValue('wechat'),
+    getSiteSettingValue('email'),
+    getSiteSettingValue('xiaohongshu'),
+    getSiteSettingValue('copyright'),
+    getSiteSettingValue('icp'),
+  ]);
   return (
     <footer className="bg-yun-dark text-yun-grey">
       <div className="container-brand py-16">
@@ -106,16 +114,16 @@ function Footer() {
           <div>
             <h4 className="text-yun-white text-sm tracking-widest mb-4">联系</h4>
             <div className="text-sm opacity-70 space-y-1">
-              <p>微信公众号：允物 Yunwu</p>
+              <p>微信公众号：{wechat || '允物 Yunwu'}</p>
               <p>小红书：允物</p>
-              <p>邮箱：hello@yunwuorigin.com</p>
+              <p>邮箱：{email || 'hello@yunwuorigin.com'}</p>
             </div>
           </div>
         </div>
 
         <div className="mt-12 pt-8 border-t border-yun-grey/20 flex flex-col md:flex-row justify-between items-center gap-4 text-xs opacity-50">
-          <p>© 2026 允物 Yunwu Origin. All rights reserved.</p>
-          <p>备案号：办理中</p>
+          <p>{copyright || '© 2026 允物 Yunwu Origin. All rights reserved.'}</p>
+          <p>{icp || '备案号：办理中'}</p>
         </div>
       </div>
     </footer>

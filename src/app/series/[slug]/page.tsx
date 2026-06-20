@@ -33,10 +33,10 @@ export default async function SeriesPage({ params }: Props) {
           </h1>
           <div className="divider mb-8" />
           <p className="text-lg font-light tracking-wider text-yun-accent/80 mb-6 leading-relaxed">
-            {series.heroText}
+            {series.shortDesc}
           </p>
           <p className="text-sm text-yun-text/60 leading-loose max-w-xl mx-auto">
-            {series.description}
+            {series.longDesc}
           </p>
         </div>
       </section>

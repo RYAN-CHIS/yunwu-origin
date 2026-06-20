@@ -54,6 +54,11 @@ const featuredCategories = [
 ] as const;
 
 export default async function HomePage() {
+  const series = await prisma.series.findMany({
+    where: { isActive: true },
+    orderBy: { sortOrder: 'asc' },
+  });
+
   const journalPosts = await prisma.journalPost.findMany({
     where: { status: 'PUBLISHED' },
     take: 3,
@@ -64,7 +69,7 @@ export default async function HomePage() {
   const featuredByCategory = await Promise.all(
     featuredCategories.map(async (cat) => {
       const products = await prisma.product.findMany({
-        where: { status: 'published', objectCategory: cat.key as any },
+        where: { status: 'published', objectCategory: { slug: cat.slug } },
         include: { series: true },
         take: 2,
         orderBy: { createdAt: 'desc' },
@@ -111,7 +116,76 @@ export default async function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          第二屏：精选作品
+          第二屏：七序世界观（从数据库读取）
+          ═══════════════════════════════════════════════════════ */}
+      <section className="py-24 bg-yun-white">
+        <div className="container-brand">
+          <div className="text-center mb-16">
+            <h2 className="text-2xl md:text-3xl font-light tracking-[0.15em] mb-4">
+              人生不同阶段的映照
+            </h2>
+            <p className="text-sm text-yun-text/50 max-w-xl mx-auto leading-loose">
+              七序不是等级，不是价格体系，而是人生不同阶段的映照。
+            </p>
+          </div>
+
+          {series.length > 0 ? (
+            <>
+              <div className="grid md:grid-cols-4 gap-3 mb-3">
+                {series.slice(0, 4).map((s) => (
+                  <Link
+                    key={s.id}
+                    href={`/series/${s.slug}`}
+                    className="group bg-white/70 p-8 md:p-10 hover:bg-white transition-all duration-300 border border-yun-grey/10 hover:border-yun-grey/20 hover:shadow-sm"
+                  >
+                    <p className="text-xs text-yun-accent tracking-[0.15em] mb-4 font-medium">
+                      第{['一','二','三','四','五','六','七'][s.sortOrder - 1]}序
+                    </p>
+                    <h3 className="text-2xl md:text-3xl font-light tracking-wider mb-3 group-hover:text-yun-accent transition-colors">
+                      {s.name}
+                    </h3>
+                    <p className="text-xs text-yun-text/40 tracking-wider mb-3">{s.shortDesc}</p>
+                    <p className="text-sm text-yun-text/60 font-light leading-relaxed line-clamp-3">
+                      {s.longDesc}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+              <div className="grid md:grid-cols-3 gap-3">
+                {series.slice(4).map((s) => (
+                  <Link
+                    key={s.id}
+                    href={`/series/${s.slug}`}
+                    className="group bg-white/70 p-8 md:p-10 hover:bg-white transition-all duration-300 border border-yun-grey/10 hover:border-yun-grey/20 hover:shadow-sm"
+                  >
+                    <p className="text-xs text-yun-accent tracking-[0.15em] mb-4 font-medium">
+                      第{['一','二','三','四','五','六','七'][s.sortOrder - 1]}序
+                    </p>
+                    <h3 className="text-2xl md:text-3xl font-light tracking-wider mb-3 group-hover:text-yun-accent transition-colors">
+                      {s.name}
+                    </h3>
+                    <p className="text-xs text-yun-text/40 tracking-wider mb-3">{s.shortDesc}</p>
+                    <p className="text-sm text-yun-text/60 font-light leading-relaxed line-clamp-3">
+                      {s.longDesc}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-sm text-yun-text/30 tracking-wider">七序内容将通过后台管理系统配置</p>
+            </div>
+          )}
+
+          <div className="text-center mt-12">
+            <Link href="/series" className="btn-outline text-sm">了解七序体系 →</Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          第三屏：精选作品
           ═══════════════════════════════════════════════════════ */}
       <section className="py-24">
         <div className="container-brand">
@@ -173,6 +247,7 @@ export default async function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
+          第四屏：五大器物体系
           第四屏：五大器物体系
           ═══════════════════════════════════════════════════════ */}
       <section className="py-24 bg-yun-white">

@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { getSiteSettingValue } from '@/lib/actions/admin-actions';
 
 export const metadata: Metadata = {
   title: '品牌故事｜允物 Yunwu Origin',
@@ -6,7 +7,16 @@ export const metadata: Metadata = {
     '允物不是关于产品的品牌，而是关于人与器物关系的品牌。让物归物，让心归心。允许万物成为万物。',
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const [brandDesc, brandOrigin, brandNameMeaning] = await Promise.all([
+    getSiteSettingValue('brand_description'),
+    getSiteSettingValue('brand_origin'),
+    getSiteSettingValue('brand_name_meaning'),
+  ]);
+
+  const description = brandDesc || '允物是关于人与器物关系的品牌。我们不试图让器物承担本不属于它的责任，希望重新建立一种真实、克制且有温度的人与物的关系。';
+  const origin = brandOrigin || '允物创立于东海之滨。创始人多年来沉浸于传统手工艺，从篆刻、大漆、瓷器到珠串，逐渐形成了对器物与人的关系的独特理解。';
+  const nameMeaning = brandNameMeaning || '允者，允执厥中。物者，万物有灵，器以载道。允物——允许万物成为万物，也允许自己成为自己。';
   return (
     <>
       <section className="min-h-[45vh] flex items-center justify-center pt-16">
@@ -25,18 +35,7 @@ export default function AboutPage() {
         <section>
           <h2 className="text-lg font-light tracking-[0.12em] mb-6 pb-3 border-b border-yun-grey/30">品牌起源</h2>
           <div className="text-sm text-yun-text/70 leading-loose space-y-4">
-            <p>
-              允物不是关于产品的品牌，而是关于人与器物关系的品牌。
-            </p>
-            <p>
-              我们生活在一个被过度包装的时代。越来越多的产品被赋予超出其本身的意义：一串珠子被承诺改变命运，一块木头被包装成身份象征，一件器物被讲述成遥不可及的传奇。人们拥有越来越多的东西，却未必更加了解自己。
-            </p>
-            <p>
-              我们不试图让器物承担本不属于它的责任，不让一串珠子背负改变命运的神话，不让一块木头成为身份焦虑的证明，不让消费变成对自我价值的确认。
-            </p>
-            <p>
-              我们只是希望：在这个一切都被过度包装的时代，重新建立一种真实、克制且有温度的人与物的关系。这便是允物存在的意义。
-            </p>
+            <p>{origin}</p>
           </div>
         </section>
 
@@ -44,12 +43,7 @@ export default function AboutPage() {
         <section>
           <h2 className="text-lg font-light tracking-[0.12em] mb-6 pb-3 border-b border-yun-grey/30">品牌名</h2>
           <div className="text-sm text-yun-text/70 leading-loose space-y-4">
-            <p>
-              允物二字，本身便是一种答案。允者，允执厥中，允恭克让。物者，万物有灵，器以载道。
-            </p>
-            <p className="text-yun-accent/80">
-              允物，不是拥有万物。而是：允许万物成为它本来的样子，也允许自己成为自己。
-            </p>
+            <p>{nameMeaning}</p>
           </div>
         </section>
 

@@ -1,12 +1,19 @@
 import ContactForm from './ContactForm'
 import { Metadata } from 'next'
+import { getSiteSettingValue } from '@/lib/actions/admin-actions'
 
 export const metadata: Metadata = {
   title: '联系允物｜允物品牌',
   description: '如果你愿意，欢迎与我们聊聊器物、生活与本心。',
 }
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const [wechat, email, xiaohongshu] = await Promise.all([
+    getSiteSettingValue('wechat'),
+    getSiteSettingValue('email'),
+    getSiteSettingValue('xiaohongshu'),
+  ]);
+
   return (
     <main className="min-h-screen bg-yun-bg">
       {/* Hero */}
@@ -32,28 +39,28 @@ export default function ContactPage() {
               联系方式
             </h2>
             <div className="space-y-6">
-              {process.env.NEXT_PUBLIC_WECHAT && (
+              {wechat && (
                 <div>
                   <p className="text-xs text-yun-subtext tracking-wider mb-1">微信</p>
-                  <p className="text-yun-text">{process.env.NEXT_PUBLIC_WECHAT}</p>
+                  <p className="text-yun-text">{wechat}</p>
                 </div>
               )}
-              {process.env.NEXT_PUBLIC_EMAIL && (
+              {email && (
                 <div>
                   <p className="text-xs text-yun-subtext tracking-wider mb-1">邮箱</p>
                   <a
-                    href={`mailto:${process.env.NEXT_PUBLIC_EMAIL}`}
+                    href={`mailto:${email}`}
                     className="text-yun-text hover:text-yun-accent transition-colors"
                   >
-                    {process.env.NEXT_PUBLIC_EMAIL}
+                    {email}
                   </a>
                 </div>
               )}
-              {process.env.NEXT_PUBLIC_XIAOHONGSHU && (
+              {xiaohongshu && (
                 <div>
                   <p className="text-xs text-yun-subtext tracking-wider mb-1">小红书</p>
                   <a
-                    href={process.env.NEXT_PUBLIC_XIAOHONGSHU}
+                    href={xiaohongshu}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-yun-text hover:text-yun-accent transition-colors"

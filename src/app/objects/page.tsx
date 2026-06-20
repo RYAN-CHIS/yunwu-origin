@@ -1,20 +1,19 @@
 import Link from 'next/link';
 import { Metadata } from 'next';
 import prisma from '@/lib/prisma';
-import { ObjectCategory } from '@prisma/client';
 
 export const metadata: Metadata = {
   title: '东方器物｜允物 ORIGIN',
   description: '允物器物中心。珠串、香器、印章、瓷器、珐琅、文房——以东方文化为根，以器物回应当代人的精神生活。',
 };
 
-const categoryConfig: Record<ObjectCategory, { name: string; english: string; desc: string; icon: string }> = {
-  BRACELET: { name: '珠串', english: 'Bracelets', desc: '人与材质的关系', icon: '○' },
-  INCENSE:  { name: '香器', english: 'Incense Objects', desc: '人与气味的关系', icon: '△' },
-  SEAL:     { name: '印章', english: 'Seals', desc: '人与文字的关系', icon: '□' },
-  CERAMIC:  { name: '瓷器', english: 'Ceramics', desc: '人与日常的关系', icon: '◇' },
-  ENAMEL:   { name: '珐琅', english: 'Enamel', desc: '人与工艺的关系', icon: '☆' },
-  SCHOLAR:  { name: '文房', english: 'Scholar Objects', desc: '人与精神空间的关系', icon: '一' },
+const categoryConfig: Record<string, { name: string; english: string; desc: string; icon: string }> = {
+  bracelet: { name: '珠串', english: 'Bracelets', desc: '人与材质的关系', icon: '○' },
+  incense:  { name: '香器', english: 'Incense Objects', desc: '人与气味的关系', icon: '△' },
+  seal:     { name: '印章', english: 'Seals', desc: '人与文字的关系', icon: '□' },
+  ceramic:  { name: '瓷器', english: 'Ceramics', desc: '人与日常的关系', icon: '◇' },
+  enamel:   { name: '珐琅', english: 'Enamel', desc: '人与工艺的关系', icon: '☆' },
+  scholar:  { name: '文房', english: 'Scholar Objects', desc: '人与精神空间的关系', icon: '一' },
 };
 
 export default async function ObjectsPage({
@@ -23,16 +22,16 @@ export default async function ObjectsPage({
   searchParams: Promise<{ category?: string }>;
 }) {
   const params = await searchParams;
-  const activeCategory = params.category as ObjectCategory | undefined;
+  const activeCategory = params.category || null;
 
-  const where = {
+  const where: any = {
     status: 'published',
-    ...(activeCategory ? { objectCategory: activeCategory } : {}),
+    ...(activeCategory ? { objectCategory: { slug: activeCategory } } : {}),
   };
 
   const products = await prisma.product.findMany({
     where,
-    include: { series: true },
+    include: { series: true, objectCategory: true },
     orderBy: { createdAt: 'desc' },
   });
 
@@ -94,7 +93,7 @@ export default async function ObjectsPage({
             <div>
               <p className="text-center text-yun-subtext/60 text-sm mb-16">
                 {activeCategory
-                  ? `${categoryConfig[activeCategory]?.name}系列正在筹备中，敬请期待。`
+                  ? `${categoryConfig[activeCategory]?.name || ''}系列正在筹备中，敬请期待。`
                   : '器物陆续上架，敬请期待。'}
               </p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-px bg-yun-grey/20">
@@ -131,7 +130,7 @@ export default async function ObjectsPage({
                   </div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-xs text-yun-accent/60 tracking-wider">
-                      {categoryConfig[p.objectCategory]?.name}
+                      {categoryConfig[p.objectCategory.slug]?.name || p.objectCategory.name}
                     </span>
                     <span className="text-xs text-yun-text/30">·</span>
                     <span className="text-xs text-yun-text/40 tracking-wider">{p.series.name}</span>

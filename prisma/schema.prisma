@@ -8,80 +8,130 @@ datasource db {
   directUrl = env("DIRECT_DATABASE_URL")
 }
 
-// ── 七序（人生状态） ──
+// ═══════════════════════════════════════════════════════
+// Brand OS - 权限系统
+// ═══════════════════════════════════════════════════════
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  name         String
+  role         AdminRole
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@map("admin_users")
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
+}
+
+// ═══════════════════════════════════════════════════════
+// 七序体系 - 品牌世界观（非商品分类、非营销标签）
+// 名称/排序/文案以《允物品牌宪章》最新版为唯一准则
+// ═══════════════════════════════════════════════════════
+
 model Series {
-  id          Int       @id @default(autoincrement())
-  slug        String    @unique
-  name        String
-  description String
-  coverImage  String    @default("")
-  heroText    String    @default("")
-  sortOrder   Int       @default(0)
-  products    Product[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id         String   @id @default(cuid())
+  name       String
+  slug       String   @unique
+  shortDesc  String   @map("short_desc")
+  longDesc   String   @db.Text @map("long_desc")
+  coverImage String?  @map("cover_image")
+  sortOrder  Int      @map("sort_order")
+  isActive   Boolean  @default(true) @map("is_active")
+  products   Product[]
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   @@map("series")
 }
 
-// ── 器物（作品） ──
+// ═══════════════════════════════════════════════════════
+// 器物体系 - 核心产品架构
+// ═══════════════════════════════════════════════════════
+
+model ObjectCategory {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  coverImage  String?   @map("cover_image")
+  sortOrder   Int       @map("sort_order")
+  products    Product[]
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("object_categories")
+}
+
+// ═══════════════════════════════════════════════════════
+// 作品中心 - 核心模型
+// ═══════════════════════════════════════════════════════
+
 model Product {
   id               Int              @id @default(autoincrement())
   sku              String           @unique
   name             String
   slug             String           @unique
-  seriesId         Int              @map("series_id")
+  seriesId         String           @map("series_id")
   series           Series           @relation(fields: [seriesId], references: [id])
-  objectCategory   ObjectCategory   @default(BRACELET) @map("object_category")
+  objectCategoryId String           @map("object_category_id")
+  objectCategory   ObjectCategory   @relation(fields: [objectCategoryId], references: [id])
   theme            String           @default("")
   story            String           @default("")
   materials        String           @default("")
-  materialsRelation  ProductMaterial[]
-  costPrice        Float            @default(0)  @map("cost_price")
-  salePrice        Float            @default(0)  @map("sale_price")
+  materialsRelation ProductMaterial[]
+  costPrice        Float            @default(0) @map("cost_price")
+  salePrice        Float            @default(0) @map("sale_price")
   coverImage       String           @default("") @map("cover_image")
   gallery          String           @default("[]")
   stock            Int              @default(0)
   status           String           @default("draft")
   createdAt        DateTime         @default(now()) @map("created_at")
-  updatedAt        DateTime         @updatedAt     @map("updated_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
 
   @@index([seriesId])
   @@index([status])
-  @@index([objectCategory])
+  @@index([objectCategoryId])
   @@map("products")
 }
 
-// ── 器物分类 ──
-enum ObjectCategory {
-  BRACELET   // 珠串
-  INCENSE    // 香器
-  SEAL       // 印章
-  CERAMIC    // 瓷器
-  ENAMEL     // 珐琅
-  SCHOLAR    // 文房
-}
+// ═══════════════════════════════════════════════════════
+// 材料研究库 - 品牌知识库
+// ═══════════════════════════════════════════════════════
 
-// ── 材料库 ──
 model Material {
-  id          Int       @id @default(autoincrement())
-  name        String    @unique
-  type        String    @default("")
-  origin      String    @default("")
-  description String    @default("")
-  image       String    @default("")
+  id              String            @id @default(cuid())
+  name            String            @unique
+  alias           String            @default("")
+  type            String            @default("")
+  origin          String            @default("")
+  history         String            @default("")
+  features        String            @default("")
+  description     String            @default("")
+  image           String            @default("")
+  relatedArticles String            @default("[]") @map("related_articles")
   productMaterials  ProductMaterial[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
 
   @@map("materials")
 }
 
 // ── 作品-材料多对多关联 ──
+
 model ProductMaterial {
   id         Int      @id @default(autoincrement())
   productId  Int      @map("product_id")
-  materialId Int      @map("material_id")
+  materialId String   @map("material_id")
   product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
 
@@ -89,25 +139,10 @@ model ProductMaterial {
   @@map("product_materials")
 }
 
-// ── 订单 ──
-model Order {
-  id          Int       @id @default(autoincrement())
-  orderNo     String    @unique @map("order_no")
-  productId   Int       @map("product_id")
-  productName String    @default("") @map("product_name")
-  quantity    Int       @default(1)
-  amount      Float
-  customerName String   @default("") @map("customer_name")
-  phone       String    @default("")
-  address     String    @default("")
-  remark      String    @default("")
-  status      String    @default("pending")
-  createdAt   DateTime  @default(now()) @map("created_at")
+// ═══════════════════════════════════════════════════════
+// 品牌志
+// ═══════════════════════════════════════════════════════
 
-  @@map("orders")
-}
-
-// ── 品牌志（Journal） ──
 model JournalPost {
   id             String          @id @default(cuid())
   title          String
@@ -128,14 +163,13 @@ model JournalPost {
   @@map("journal_posts")
 }
 
-// 品牌志分类：器物、材料、工艺、东海、创作、哲思
 enum JournalCategory {
-  OBJECT      // 器物
-  MATERIAL    // 材料
-  CRAFT       // 工艺
-  DONGHAI     // 东海
-  CREATION    // 创作
-  PHILOSOPHY  // 哲思
+  OBJECT
+  MATERIAL
+  CRAFT
+  DONGHAI
+  CREATION
+  PHILOSOPHY
 }
 
 enum PublishStatus {
@@ -143,15 +177,97 @@ enum PublishStatus {
   PUBLISHED
 }
 
-// ── 联系表单线索 ──
+// ═══════════════════════════════════════════════════════
+// 联系表单线索
+// ═══════════════════════════════════════════════════════
+
 model ContactLead {
-  id        String   @id @default(cuid())
-  name      String
-  wechat    String?  @map("wechat")
-  email     String?  @map("email")
-  message   String?
-  createdAt DateTime @default(now()) @map("created_at")
+  id                 String   @id @default(cuid())
+  name               String
+  wechat             String?
+  email              String?
+  message            String?
+  sourcePage         String?  @map("source_page")
+  interestedSeries   String?  @map("interested_series")
+  interestedCategory String?  @map("interested_category")
+  createdAt          DateTime @default(now()) @map("created_at")
 
   @@index([createdAt])
   @@map("contact_leads")
+}
+
+// ═══════════════════════════════════════════════════════
+// 图片资产库 - Vercel Blob
+// ═══════════════════════════════════════════════════════
+
+model Media {
+  id       String        @id @default(cuid())
+  filename String
+  url      String
+  category MediaCategory
+  altText  String?       @map("alt_text")
+  size     Int
+  mimeType String        @map("mime_type")
+  createdAt DateTime     @default(now()) @map("created_at")
+
+  @@map("media")
+}
+
+enum MediaCategory {
+  PRODUCT
+  MATERIAL
+  BRAND
+  CRAFT
+  ARTICLE
+}
+
+// ═══════════════════════════════════════════════════════
+// SEO 中心
+// ═══════════════════════════════════════════════════════
+
+model SeoConfig {
+  id          String   @id @default(cuid())
+  pageKey     String   @unique @map("page_key")
+  title       String
+  description String
+  ogImage     String?  @map("og_image")
+  canonical   String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("seo_configs")
+}
+
+// ═══════════════════════════════════════════════════════
+// 系统设置
+// ═══════════════════════════════════════════════════════
+
+model SiteSettings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("site_settings")
+}
+
+// ═══════════════════════════════════════════════════════
+// 订单（保留兼容，当前阶段不活跃开发）
+// ═══════════════════════════════════════════════════════
+
+model Order {
+  id           Int      @id @default(autoincrement())
+  orderNo      String   @unique @map("order_no")
+  productId    Int      @map("product_id")
+  productName  String   @default("") @map("product_name")
+  quantity     Int      @default(1)
+  amount       Float
+  customerName String   @default("") @map("customer_name")
+  phone        String   @default("")
+  address      String   @default("")
+  remark       String   @default("")
+  status       String   @default("pending")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("orders")
 }

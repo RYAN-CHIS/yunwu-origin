@@ -13,7 +13,7 @@ export default function AboutPage() {
       {/* Hero */}
       <SectionWrapper className="min-h-[45vh] flex items-center justify-center">
         <div className="text-center max-w-4xl mx-auto fade-in">
-          <p className="font-display text-6xl md:text-8xl text-[var(--yun-gray)]/10 tracking-widest leading-none mb-8">
+          <p className="font-display text-6xl md:text-8xl text-[var(--yun-gray)]/5 tracking-widest leading-none mb-8">
             ABOUT
           </p>
           <h1 className="font-display text-3xl md:text-4xl text-[var(--yun-ink)] tracking-wide mb-6">

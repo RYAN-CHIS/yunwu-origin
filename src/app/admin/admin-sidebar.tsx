@@ -75,6 +75,20 @@ function filterNavItems(role: string) {
     .filter(Boolean);
 }
 
+// ── 侧边栏配色常量（深蓝灰 #50677D 为基底） ──
+const S = {
+  bg:         "#50677D",   // 侧边栏底色
+  bgHover:    "#425A6F",   // hover 背景
+  bgActive:   "#5B7991",   // active 背景
+  border:     "#5E7A8F",   // 分割线
+  logoText:   "#FFFFFF",   // Logo 主文字
+  logoSub:    "#A8C0D4",   // Logo 副文字
+  groupLabel: "#9BBAD4",   // 分组标题
+  itemText:   "#DCE8F2",   // 菜单项文字
+  itemActive: "#FFFFFF",   // 菜单项激活文字
+  footerText: "#8BA7BF",   // 底部操作文字
+};
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -87,35 +101,51 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="flex min-h-screen" style={{ background: "var(--yun-bg, #FAFAF9)" }}>
-      {/* Sidebar — 与 ERP 品牌色系保持一致 */}
-      <aside className="w-56 shrink-0 border-r overflow-y-auto" style={{ borderColor: "var(--yun-line, #E8D9B5)", background: "var(--yun-bg, #F6F2ED)" }}>
-        <div className="px-5 py-5 border-b" style={{ borderColor: "var(--yun-line, #E8D9B5)", background: "rgba(255,251,235,0.6)" }}>
-          <Link href="/admin" className="block">
-            <p className="text-base font-medium tracking-[0.15em]" style={{ color: "var(--yun-text, #3A2A1A)" }}>允物 Brand OS</p>
-            <p className="text-[10px] mt-0.5 tracking-wider" style={{ color: "var(--yun-subtext, #8C7660)" }}>品牌操作系统</p>
+    <div className="flex min-h-screen" style={{ background: "var(--yun-bg, #F6F2ED)" }}>
+      {/* Sidebar */}
+      <aside className="w-52 shrink-0 flex flex-col overflow-y-auto"
+        style={{ background: S.bg }}>
+
+        {/* ── Logo 区 ── */}
+        <div className="px-5 pt-5 pb-4">
+          <Link href="/admin" className="block group">
+            <p className="text-[15px] font-semibold tracking-[0.12em]"
+              style={{ color: S.logoText }}>
+              允物 Brand OS
+            </p>
+            <p className="text-[10px] mt-0.5 tracking-widest"
+              style={{ color: S.logoSub }}>
+              品牌操作系统
+            </p>
           </Link>
         </div>
-        <nav className="p-3 space-y-0.5">
+
+        {/* ── 导航菜单 ── */}
+        <nav className="flex-1 px-3 space-y-1">
           {navItems.map((item, i) => {
             if (!item) return null;
             if ("items" in item && item.items) {
               return (
-                <div key={i} className="mb-1">
-                  <p className="px-3 py-1.5 text-[10px] tracking-[0.1em] font-medium uppercase"
-                    style={{ color: "var(--yun-muted, #B8A898)" }}>
+                <div key={i} className="mb-3">
+                  {/* 分组标题 */}
+                  <p className="px-3 py-1 text-[11px] tracking-[0.06em] font-medium"
+                    style={{ color: S.groupLabel }}>
                     {item.label}
                   </p>
+                  {/* 子菜单 */}
                   {item.items.map((sub) => {
                     const active = pathname === sub.href || pathname.startsWith(sub.href + "/");
                     return (
                       <Link key={sub.href} href={sub.href}
-                        className="block px-3 py-1.5 text-sm rounded transition-colors"
+                        className="block px-3 py-[7px] text-[13px] rounded-md transition-all duration-150"
                         style={{
-                          color: active ? "var(--yun-dark, #3A2A1A)" : "var(--yun-text, #3A2A1A)",
-                          background: active ? "rgba(200,169,114,0.18)" : "transparent",
+                          color: active ? S.itemActive : S.itemText,
+                          background: active ? S.bgActive : "transparent",
                           fontWeight: active ? 500 : 400,
-                        }}>
+                        }}
+                        onMouseEnter={(e) => { if (!active) (e.target as HTMLElement).style.background = S.bgHover; }}
+                        onMouseLeave={(e) => { if (!active) (e.target as HTMLElement).style.background = "transparent"; }}
+                      >
                         {sub.label}
                       </Link>
                     );
@@ -123,32 +153,46 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </div>
               );
             }
+            // 顶层独立菜单项
             const active = pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link key={item.href} href={item.href}
-                className="block px-3 py-1.5 text-sm rounded transition-colors"
+                className="block px-3 py-[7px] text-[13px] rounded-md transition-all duration-150"
                 style={{
-                  color: active ? "var(--yun-dark, #3A2A1A)" : "var(--yun-text, #3A2A1A)",
-                  background: active ? "rgba(200,169,114,0.18)" : "transparent",
+                  color: active ? S.itemActive : S.itemText,
+                  background: active ? S.bgActive : "transparent",
                   fontWeight: active ? 500 : 400,
-                }}>
+                }}
+                onMouseEnter={(e) => { if (!active) (e.target as HTMLElement).style.background = S.bgHover; }}
+                onMouseLeave={(e) => { if (!active) (e.target as HTMLElement).style.background = "transparent"; }}
+              >
                 {item.label}
               </Link>
             );
           })}
         </nav>
-        <div className="px-3 mt-4 border-t pt-3" style={{ borderColor: "var(--yun-line, #E8D9B5)" }}>
-          <Link href="/" className="block px-3 py-1.5 text-xs rounded" style={{ color: "var(--yun-subtext, #8C7660)" }}>
+
+        {/* ── 底部操作区 ── */}
+        <div className="px-3 pb-4 pt-2" style={{ borderTop: `1px solid ${S.border}` }}>
+          <Link href="/" className="block px-3 py-[6px] text-xs rounded-md transition-colors"
+            style={{ color: S.footerText }}
+            onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
+            onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
+          >
             前往官网
           </Link>
           <button onClick={() => signOut({ callbackUrl: "/admin/login" })}
-            className="block w-full text-left px-3 py-1.5 text-xs rounded" style={{ color: "var(--yun-subtext, #8C7660)" }}>
+            className="block w-full text-left px-3 py-[6px] text-xs rounded-md transition-colors"
+            style={{ color: S.footerText }}
+            onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
+            onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
+          >
             退出登录
           </button>
         </div>
       </aside>
 
-      {/* Main */}
+      {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
         <div className="p-6 md:p-8">
           {children}

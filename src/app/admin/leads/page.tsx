@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma'
 export const dynamic = 'force-dynamic'
 
 export const metadata = {
-  title: '联系线索｜允物后台',
+  title: '潜在线索 · 允物后台',
 }
 
 export default async function AdminLeadsPage() {

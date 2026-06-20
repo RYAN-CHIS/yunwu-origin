@@ -75,27 +75,67 @@ export default function AboutPage() {
           </div>
         </section>
 
+        {/* 工艺体系 */}
+        <section>
+          <h2 className="text-lg font-light tracking-[0.12em] mb-6 pb-3 border-b border-yun-grey/30">工艺体系</h2>
+          <p className="text-sm text-yun-text/50 leading-loose mb-8">
+            允物承袭东方传统工艺精神，融合当代审美，以手工打磨的每件作品，只为一件值得长久陪伴的器物。
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
+            {[
+              { name: '篆刻', img: '/images/crafts/seal-carving.png', desc: '刀与石的对话，每一刀都是不可逆的承诺' },
+              { name: '瓷器', img: '/images/crafts/porcelain.png', desc: '泥与火的共生，在高温中淬炼温润' },
+              { name: '大漆', img: '/images/crafts/lacquerware.png', desc: '时间的艺术，一层一层地沉淀出深邃的光泽' },
+              { name: '掐丝珐琅', img: '/images/crafts/cloisonne.png', desc: '铜丝为骨，釉彩为魂，方寸之间流光溢彩' },
+              { name: '皮具', img: '/images/crafts/leather.png', desc: '以最质朴的方式，呈现时间独有的纹理' },
+            ].map((craft) => (
+              <div key={craft.name} className="group text-center">
+                <div className="aspect-square rounded-brand overflow-hidden bg-yun-bg-secondary mb-3 border border-yun-line/50">
+                  <img
+                    src={craft.img}
+                    alt={craft.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    loading="lazy"
+                  />
+                </div>
+                <p className="text-sm tracking-wider font-medium mb-1">{craft.name}</p>
+                <p className="text-xs text-yun-text/40 leading-relaxed">{craft.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* 七序世界观 */}
         <section>
           <h2 className="text-lg font-light tracking-[0.12em] mb-6 pb-3 border-b border-yun-grey/30">七序世界观</h2>
           <div className="text-sm text-yun-text/70 leading-loose space-y-4">
             <p>
-              允物并不把七序定义为产品分类。七序本质上是七种人生状态。
+              七序不是等级，不是价格体系，不是会员制度。
             </p>
             <p>
-              人生并非升级打怪，没有绝对高低，只是不断循环往复。有时我们处于芙初，有时我们处于既明，有时又回到了栖迟。
+              七序本质上是七种人生状态——不是向上的阶梯，而是向内的旅程。你在七序中看到的，其实是不同阶段的自己。
             </p>
-            <p className="text-yun-accent/80">
-              因此七序不是等级，不是会员制度，不是价格体系，更不是人生标准答案。它们不是向上的阶梯，而是向内的旅程。你在七序中看到的，其实是不同阶段的自己。
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
-              {['芙初', '栖迟', '扶苏', '沧溟', '既明', '观复', '藏真'].map((name, i) => (
-                <div key={name} className="border border-yun rounded-brand p-3 text-center">
-                  <p className="text-xs text-yun-accent/50">第{i + 1}序</p>
-                  <p className="text-sm tracking-wider mt-1">{name}</p>
-                </div>
-              ))}
-            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+            {[
+              { name: '芙初', subtitle: '本真之序', poem: '清水出芙蓉，天然去雕饰', desc: '人生最珍贵的状态，不是成功，而是第一次看见世界时的欢喜。', keys: '本真 · 喜悦 · 爱 · 美好 · 纯粹 · 生命力' },
+              { name: '栖迟', subtitle: '归心之序', poem: '衡门之下，可以栖迟', desc: '允许自己停下来，允许自己不那么着急。', keys: '松弛 · 治愈 · 安住 · 归心 · 安顿' },
+              { name: '扶苏', subtitle: '生长之序', poem: '山有扶苏，隰有荷华', desc: '向阳而生，成为更好的自己。', keys: '成长 · 行动 · 创造 · 丰盛' },
+              { name: '沧溟', subtitle: '格局之序', poem: '北冥有鱼，其名为鲲', desc: '从关注自己，到连接更大的世界。', keys: '机遇 · 人脉 · 连接 · 格局 · 资源' },
+              { name: '既明', subtitle: '觉知之序', poem: '不知东方之既白', desc: '看见世界之后，开始看见自己。', keys: '智慧 · 沉淀 · 定力 · 觉知' },
+              { name: '观复', subtitle: '收藏之序', poem: '万物并作，吾以观复', desc: '看遍繁华，终归本心。', keys: '收藏 · 美学 · 回归 · 时间' },
+              { name: '藏真', subtitle: '传承之序', poem: '真者，受于天也，自然不可易也', desc: '最终留下的，只有真实。', keys: '孤品 · 匠心 · 传承 · 永恒' },
+            ].map((seq, i) => (
+              <div key={seq.name} className="border border-yun rounded-brand p-5">
+                <p className="text-xs text-yun-accent/50 tracking-widest mb-1">
+                  第{['一','二','三','四','五','六','七'][i]}序 · {seq.subtitle}
+                </p>
+                <p className="text-base tracking-wider mb-2 font-medium">{seq.name}</p>
+                <p className="text-sm text-yun-accent/70 font-light italic mb-2">「{seq.poem}」</p>
+                <p className="text-xs text-yun-text/50 leading-relaxed mb-2">{seq.desc}</p>
+                <p className="text-[11px] text-yun-accent/40 tracking-wider">{seq.keys}</p>
+              </div>
+            ))}
           </div>
         </section>
 

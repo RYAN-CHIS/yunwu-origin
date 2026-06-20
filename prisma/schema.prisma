@@ -16,7 +16,7 @@ model Series {
   description String
   coverImage  String    @default("")
   heroText    String    @default("")
-  sortOrder   Int       @default(0)
+  sortOrder   Int       @default(0) @map("sort_order")
   products    Product[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

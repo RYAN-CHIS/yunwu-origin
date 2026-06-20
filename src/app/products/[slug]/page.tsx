@@ -1,10 +1,41 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import prisma from '@/lib/prisma';
+import { Metadata } from 'next';
 import BuyButton from './BuyButton';
 
 interface Props {
   params: Promise<{ slug: string }>;
+}
+
+// ── 动态 SEO Metadata ──
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await prisma.product.findUnique({
+    where: { slug },
+    include: { series: true },
+  });
+
+  if (!product || product.status !== 'PUBLISHED') return {};
+
+  const title = product.sku
+    ? `${product.name}｜${product.series?.name || ''}｜允物`
+    : `${product.name}｜允物`;
+
+  return {
+    title,
+    description: product.story || product.theme || `${product.name} — 允物东方器物作品`,
+    openGraph: {
+      title,
+      description: product.story || product.theme || '',
+      type: 'website',
+      images: product.coverImage ? [product.coverImage] : [],
+    },
+    keywords: [
+      '允物', product.name, product.series?.name || '',
+      product.objectCategory || '', '东方器物',
+    ].filter(Boolean),
+  };
 }
 
 export default async function ProductDetailPage({ params }: Props) {
@@ -30,8 +61,36 @@ export default async function ProductDetailPage({ params }: Props) {
     include: { series: true },
   });
 
+  // ── JSON-LD 结构化数据 ──
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.story || product.theme || '',
+    sku: product.sku || '',
+    offers: {
+      '@type': 'Offer',
+      price: product.salePrice,
+      priceCurrency: 'CNY',
+      availability: product.stock > 0
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock',
+    },
+    brand: {
+      '@type': 'Brand',
+      name: '允物',
+    },
+    ...(product.coverImage && { image: product.coverImage }),
+  };
+
   return (
     <>
+      {/* JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <article className="pt-24">
         <div className="container-brand">
           {/* 面包屑 */}

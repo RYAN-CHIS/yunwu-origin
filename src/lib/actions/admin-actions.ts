@@ -9,17 +9,59 @@ import bcrypt from "bcryptjs";
 import { del } from "@vercel/blob";
 
 // ═══════════════════════════════════════════════════════
-// Auth helpers
+// Auth helpers — 统一 RBAC 校验
 // ═══════════════════════════════════════════════════════
 
-export async function requireAdmin() {
+/** 获取当前 session，未登录则重定向到登录页 */
+async function getAuthSession() {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect("/admin/login");
   return session;
 }
 
+/**
+ * 校验当前用户是否拥有指定角色。
+ * 未登录 → 重定向 /admin/login
+ * 角色不足 → 重定向 /admin（后台首页）
+ */
+async function requireRole(allowed: ("SUPER_ADMIN" | "ADMIN" | "EDITOR" | "OPERATOR")[]) {
+  const session = await getAuthSession();
+  const role = (session.user as any).role as string;
+  if (!allowed.includes(role as any)) redirect("/admin");
+  return session;
+}
+
 // ═══════════════════════════════════════════════════════
-// Series CRUD
+// 快捷校验函数（按施工单权限矩阵）
+// ═══════════════════════════════════════════════════════
+
+/** 所有已登录角色（读取操作通用） */
+export async function requireAnyRole() {
+  return requireRole(["SUPER_ADMIN", "ADMIN", "EDITOR", "OPERATOR"]);
+}
+
+/** SUPER_ADMIN + ADMIN（七序/器物/材料/作品/图片库/SEO 的写操作） */
+export async function requireAdmin() {
+  return requireRole(["SUPER_ADMIN", "ADMIN"]);
+}
+
+/** 仅 SUPER_ADMIN（系统设置 / 用户管理） */
+export async function requireSuperAdmin() {
+  return requireRole(["SUPER_ADMIN"]);
+}
+
+/** 所有已登录角色（品牌志读写，按施工单 EDITOR+OPERATOR 可访问） */
+export async function requireContentEditor() {
+  return requireRole(["SUPER_ADMIN", "ADMIN", "EDITOR", "OPERATOR"]);
+}
+
+/** SUPER_ADMIN + ADMIN + OPERATOR（Leads 查看，按施工单） */
+export async function requireLeadsAccess() {
+  return requireRole(["SUPER_ADMIN", "ADMIN", "OPERATOR"]);
+}
+
+// ═══════════════════════════════════════════════════════
+// Series CRUD（SUPER_ADMIN / ADMIN）
 // ═══════════════════════════════════════════════════════
 
 export async function getSeries() {
@@ -55,7 +97,7 @@ export async function deleteSeries(id: string) {
 }
 
 // ═══════════════════════════════════════════════════════
-// ObjectCategory CRUD
+// ObjectCategory CRUD（SUPER_ADMIN / ADMIN）
 // ═══════════════════════════════════════════════════════
 
 export async function getObjectCategories() {
@@ -90,7 +132,7 @@ export async function deleteObjectCategory(id: string) {
 }
 
 // ═══════════════════════════════════════════════════════
-// Material CRUD
+// Material CRUD（SUPER_ADMIN / ADMIN）
 // ═══════════════════════════════════════════════════════
 
 export async function getMaterials() {
@@ -126,10 +168,12 @@ export async function deleteMaterial(id: string) {
 
 // ═══════════════════════════════════════════════════════
 // Product CRUD
+// 读取：所有已登录角色（施工单所有角色均可访问作品中心）
+// 写操作：SUPER_ADMIN + ADMIN
 // ═══════════════════════════════════════════════════════
 
 export async function getProducts() {
-  await requireAdmin();
+  await requireAnyRole();
   return prisma.product.findMany({
     include: { series: true, objectCategory: true },
     orderBy: { updatedAt: "desc" },
@@ -137,7 +181,7 @@ export async function getProducts() {
 }
 
 export async function getSeriesForSelect() {
-  await requireAdmin();
+  await requireAnyRole();
   return prisma.series.findMany({
     where: { isActive: true },
     select: { id: true, name: true },
@@ -146,7 +190,7 @@ export async function getSeriesForSelect() {
 }
 
 export async function getCategoriesForSelect() {
-  await requireAdmin();
+  await requireAnyRole();
   return prisma.objectCategory.findMany({
     select: { id: true, name: true },
     orderBy: { sortOrder: "asc" },
@@ -184,11 +228,11 @@ export async function deleteProduct(id: number) {
 }
 
 // ═══════════════════════════════════════════════════════
-// Journal CRUD
+// Journal CRUD（所有已登录角色，按施工单）
 // ═══════════════════════════════════════════════════════
 
 export async function getJournalPosts() {
-  await requireAdmin();
+  await requireContentEditor();
   return prisma.journalPost.findMany({ orderBy: { updatedAt: "desc" } });
 }
 
@@ -197,7 +241,7 @@ export async function createJournalPost(data: {
   coverImage?: string; category: any; status: any;
   seoTitle?: string; seoDescription?: string;
 }) {
-  await requireAdmin();
+  await requireContentEditor();
   const post = await prisma.journalPost.create({ data });
   revalidatePath("/admin/journal");
   return post;
@@ -208,7 +252,7 @@ export async function updateJournalPost(id: string, data: {
   coverImage?: string; category?: any; status?: any;
   seoTitle?: string; seoDescription?: string;
 }) {
-  await requireAdmin();
+  await requireContentEditor();
   const post = await prisma.journalPost.update({ where: { id }, data });
   revalidatePath("/admin/journal");
   revalidatePath("/journal");
@@ -216,17 +260,17 @@ export async function updateJournalPost(id: string, data: {
 }
 
 export async function deleteJournalPost(id: string) {
-  await requireAdmin();
+  await requireContentEditor();
   await prisma.journalPost.delete({ where: { id } });
   revalidatePath("/admin/journal");
 }
 
 // ═══════════════════════════════════════════════════════
-// Media CRUD
+// Media CRUD（读取：SUPER_ADMIN/ADMIN/EDITOR，删除：SUPER_ADMIN/ADMIN）
 // ═══════════════════════════════════════════════════════
 
 export async function getMedia() {
-  await requireAdmin();
+  await requireContentEditor();
   return prisma.media.findMany({ orderBy: { createdAt: "desc" } });
 }
 
@@ -234,7 +278,7 @@ export async function saveMedia(data: {
   filename: string; url: string; category: any;
   altText?: string; size: number; mimeType: string;
 }) {
-  await requireAdmin();
+  await requireContentEditor();
   const m = await prisma.media.create({ data });
   revalidatePath("/admin/media");
   return m;
@@ -251,7 +295,7 @@ export async function deleteMedia(id: string) {
 }
 
 // ═══════════════════════════════════════════════════════
-// SEO CRUD
+// SEO CRUD（SUPER_ADMIN / ADMIN）
 // ═══════════════════════════════════════════════════════
 
 export async function getSeoConfigs() {
@@ -274,16 +318,16 @@ export async function upsertSeoConfig(data: {
 }
 
 // ═══════════════════════════════════════════════════════
-// Site Settings
+// Site Settings（仅 SUPER_ADMIN）
 // ═══════════════════════════════════════════════════════
 
 export async function getSiteSettings() {
-  await requireAdmin();
+  await requireSuperAdmin();
   return prisma.siteSettings.findMany();
 }
 
 export async function upsertSiteSetting(key: string, value: string) {
-  await requireAdmin();
+  await requireSuperAdmin();
   const s = await prisma.siteSettings.upsert({
     where: { key },
     create: { key, value },
@@ -303,27 +347,27 @@ export async function getSiteSettingValue(key: string): Promise<string | null> {
 }
 
 // ═══════════════════════════════════════════════════════
-// Leads
+// Leads（SUPER_ADMIN / ADMIN / OPERATOR）
 // ═══════════════════════════════════════════════════════
 
 export async function getLeads() {
-  await requireAdmin();
+  await requireLeadsAccess();
   return prisma.contactLead.findMany({ orderBy: { createdAt: "desc" } });
 }
 
 // ═══════════════════════════════════════════════════════
-// Admin users management
+// Admin Users（仅 SUPER_ADMIN）
 // ═══════════════════════════════════════════════════════
 
 export async function getAdminUsers() {
-  await requireAdmin();
+  await requireSuperAdmin();
   return prisma.adminUser.findMany({ orderBy: { createdAt: "desc" } });
 }
 
 export async function createAdminUser(data: {
   email: string; name: string; password: string; role: string;
 }) {
-  await requireAdmin();
+  await requireSuperAdmin();
   const hash = await bcrypt.hash(data.password, 10);
   const u = await prisma.adminUser.create({
     data: { email: data.email, name: data.name, passwordHash: hash, role: data.role as any },
@@ -333,7 +377,7 @@ export async function createAdminUser(data: {
 }
 
 export async function deleteAdminUser(id: string) {
-  await requireAdmin();
+  await requireSuperAdmin();
   await prisma.adminUser.delete({ where: { id } });
   revalidatePath("/admin/settings");
 }

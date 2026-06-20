@@ -1,4 +1,6 @@
 "use client";
+export const dynamic = 'force-dynamic'
+
 
 import { useEffect, useState } from "react";
 import { getSeries, createSeries, updateSeries, deleteSeries } from "@/lib/actions/admin-actions";

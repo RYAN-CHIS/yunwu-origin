@@ -25,11 +25,10 @@ model AdminUser {
 }
 
 enum AdminRole {
-  SUPER_ADMIN    // 超级管理员 — 全部权限
-  ADMIN           // 管理员 — 除系统设置外的全部权限
-  OPERATOR        // 运营 — 内容管理、订单管理、图片库
-  STORE_MANAGER   // 店长 — 订单管理、库存查看
-  EDITOR          // 编辑 — 仅内容编辑（品牌志）
+  SUPER_ADMIN  // 超级管理员 — 全部权限
+  ADMIN         // 管理员 — 除系统设置外的全部权限
+  EDITOR        // 编辑 — 品牌志、图片库、产品内容编辑
+  OPERATOR      // 运营 — Leads、产品状态、品牌志发布
 }
 
 // ═══════════════════════════════════════════════════════
@@ -259,6 +258,25 @@ model SiteSettings {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("site_settings")
+}
+
+// ═══════════════════════════════════════════════════════
+// 审计日志（ERP + Brand OS 共用）
+// ═══════════════════════════════════════════════════════
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  action      String
+  entityType  String   @map("entity_type")
+  entityId    String?  @map("entity_id")
+  details     String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
 }
 
 // ═══════════════════════════════════════════════════════

@@ -1,4 +1,6 @@
 "use client";
+export const dynamic = 'force-dynamic'
+
 
 import { useEffect, useState } from "react";
 import { getProducts, createProduct, deleteProduct, getSeriesForSelect, getCategoriesForSelect } from "@/lib/actions/admin-actions";

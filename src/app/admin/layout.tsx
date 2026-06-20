@@ -4,13 +4,43 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 
-// ── 角色 → 可见菜单路径 ──
+// ── 角色 → 可见菜单路径（严格按施工单） ──
 const PERMISSIONS: Record<string, string[]> = {
-  SUPER_ADMIN:  ["/admin"],
-  ADMIN:           ["/admin"],
-  OPERATOR:       ["/admin", "/admin/series", "/admin/objects", "/admin/materials", "/admin/journal", "/admin/products", "/admin/media", "/admin/leads"],
-  STORE_MANAGER:  ["/admin", "/admin/products", "/admin/leads"],
-  EDITOR:         ["/admin", "/admin/journal"],
+  SUPER_ADMIN: [
+    "/admin",
+    "/admin/products",
+    "/admin/series",
+    "/admin/objects",
+    "/admin/materials",
+    "/admin/journal",
+    "/admin/media",
+    "/admin/seo",
+    "/admin/leads",
+    "/admin/settings",
+  ],
+  ADMIN: [
+    "/admin",
+    "/admin/products",
+    "/admin/series",
+    "/admin/objects",
+    "/admin/materials",
+    "/admin/journal",
+    "/admin/media",
+    "/admin/seo",
+    "/admin/leads",
+  ],
+  EDITOR: [
+    "/admin",
+    "/admin/journal",
+    "/admin/media",
+    "/admin/products",
+  ],
+  OPERATOR: [
+    "/admin",
+    "/admin/products",
+    "/admin/journal",
+    "/admin/leads",
+  ],
 };
 
 const allNavItems = [
@@ -68,6 +98,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
         <nav className="p-3 space-y-0.5">
           {navItems.map((item, i) => {
+            if (!item) return null;
             if ("items" in item && item.items) {
               return (
                 <div key={i} className="mb-1">

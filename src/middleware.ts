@@ -7,7 +7,12 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ token, req }) => {
+        // 放行登录页，避免重定向循环
+        const { pathname } = req.nextUrl;
+        if (pathname === "/admin/login") return true;
+        return !!token;
+      },
     },
   }
 );

@@ -214,11 +214,19 @@ model Media {
 }
 
 enum MediaCategory {
-  PRODUCT
-  MATERIAL
-  BRAND
-  CRAFT
-  ARTICLE
+  // ── 器物作品分类 ──
+  PRODUCT     // 作品（通用/兼容旧数据）
+  BEADS       // 串珠
+  SEAL        // 印章
+  INCENSE     // 香器
+  PORCELAIN   // 瓷器
+  WOODWORK    // 木作
+  OTHER_OBJ   // 其他器物
+  // ── 通用分类 ──
+  MATERIAL    // 材料图
+  BRAND       // 品牌图（Logo/海报等）
+  CRAFT       // 工艺图
+  ARTICLE     // 文章配图
 }
 
 // ═══════════════════════════════════════════════════════

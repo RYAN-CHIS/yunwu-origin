@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     if (!slugs?.length) return NextResponse.json([]);
 
     const products = await prisma.product.findMany({
-      where: { slug: { in: slugs }, status: 'published' },
+      where: { slug: { in: slugs }, status: 'PUBLISHED' },
       select: { slug: true, name: true, salePrice: true, coverImage: true },
     });
 

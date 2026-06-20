@@ -26,7 +26,7 @@ export default async function ObjectsPage({
   const activeCategory = params.category as ObjectCategory | undefined;
 
   const where = {
-    status: 'published',
+    status: 'PUBLISHED',
     ...(activeCategory ? { objectCategory: activeCategory } : {}),
   };
 

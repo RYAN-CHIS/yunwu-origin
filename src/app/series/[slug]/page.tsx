@@ -12,7 +12,7 @@ export default async function SeriesPage({ params }: Props) {
     where: { slug },
     include: {
       products: {
-        where: { status: 'published' },
+        where: { status: 'PUBLISHED' },
         orderBy: { salePrice: 'asc' },
       },
     },

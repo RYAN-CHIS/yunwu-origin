@@ -17,14 +17,14 @@ export default async function ProductDetailPage({ params }: Props) {
     },
   });
 
-  if (!product || product.status !== 'published') notFound();
+  if (!product || product.status !== 'PUBLISHED') notFound();
 
   // 相关作品：同序的其他作品
   const related = await prisma.product.findMany({
     where: {
       seriesId: product.seriesId,
       id: { not: product.id },
-      status: 'published',
+      status: 'PUBLISHED',
     },
     take: 4,
     include: { series: true },

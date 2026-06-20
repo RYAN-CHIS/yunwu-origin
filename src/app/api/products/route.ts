@@ -5,7 +5,7 @@ import prisma from '@/lib/prisma';
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const seriesId = searchParams.get('seriesId');
-  const status = searchParams.get('status') || 'published';
+  const status = searchParams.get('status') || 'PUBLISHED';
 
   const where: Record<string, unknown> = {};
   if (seriesId) where.seriesId = parseInt(seriesId);

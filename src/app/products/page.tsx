@@ -8,7 +8,7 @@ export const metadata = {
 
 export default async function ProductsPage() {
   const products = await prisma.product.findMany({
-    where: { status: 'published' },
+    where: { status: 'PUBLISHED' },
     include: { series: true },
     orderBy: [{ series: { sortOrder: 'asc' } }, { salePrice: 'asc' }],
   });

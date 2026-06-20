@@ -88,12 +88,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex min-h-screen" style={{ background: "var(--yun-bg, #FAFAF9)" }}>
-      {/* Sidebar */}
-      <aside className="w-56 shrink-0 border-r overflow-y-auto" style={{ borderColor: "var(--yun-line, #E8E5DF)", background: "#fff" }}>
-        <div className="px-5 py-5 border-b" style={{ borderColor: "var(--yun-line, #E8E5DF)" }}>
+      {/* Sidebar — 与 ERP 品牌色系保持一致 */}
+      <aside className="w-56 shrink-0 border-r overflow-y-auto" style={{ borderColor: "var(--yun-line, #E8D9B5)", background: "var(--yun-bg, #F6F2ED)" }}>
+        <div className="px-5 py-5 border-b" style={{ borderColor: "var(--yun-line, #E8D9B5)", background: "rgba(255,251,235,0.6)" }}>
           <Link href="/admin" className="block">
-            <p className="text-base font-medium tracking-[0.15em]" style={{ color: "var(--yun-text, #2C2C2A)" }}>允物 Brand OS</p>
-            <p className="text-[10px] mt-0.5 tracking-wider" style={{ color: "var(--yun-subtext, #888780)" }}>品牌操作系统</p>
+            <p className="text-base font-medium tracking-[0.15em]" style={{ color: "var(--yun-text, #3A2A1A)" }}>允物 Brand OS</p>
+            <p className="text-[10px] mt-0.5 tracking-wider" style={{ color: "var(--yun-subtext, #8C7660)" }}>品牌操作系统</p>
           </Link>
         </div>
         <nav className="p-3 space-y-0.5">
@@ -103,7 +103,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               return (
                 <div key={i} className="mb-1">
                   <p className="px-3 py-1.5 text-[10px] tracking-[0.1em] font-medium uppercase"
-                    style={{ color: "var(--yun-subtext, #888780)" }}>
+                    style={{ color: "var(--yun-muted, #B8A898)" }}>
                     {item.label}
                   </p>
                   {item.items.map((sub) => {
@@ -112,8 +112,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       <Link key={sub.href} href={sub.href}
                         className="block px-3 py-1.5 text-sm rounded transition-colors"
                         style={{
-                          color: active ? "var(--yun-accent, #A16207)" : "var(--yun-text, #2C2C2A)",
-                          background: active ? "rgba(161,98,7,0.06)" : "transparent",
+                          color: active ? "var(--yun-dark, #3A2A1A)" : "var(--yun-text, #3A2A1A)",
+                          background: active ? "rgba(200,169,114,0.18)" : "transparent",
+                          fontWeight: active ? 500 : 400,
                         }}>
                         {sub.label}
                       </Link>
@@ -127,20 +128,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link key={item.href} href={item.href}
                 className="block px-3 py-1.5 text-sm rounded transition-colors"
                 style={{
-                  color: active ? "var(--yun-accent, #A16207)" : "var(--yun-text, #2C2C2A)",
-                  background: active ? "rgba(161,98,7,0.06)" : "transparent",
+                  color: active ? "var(--yun-dark, #3A2A1A)" : "var(--yun-text, #3A2A1A)",
+                  background: active ? "rgba(200,169,114,0.18)" : "transparent",
+                  fontWeight: active ? 500 : 400,
                 }}>
                 {item.label}
               </Link>
             );
           })}
         </nav>
-        <div className="px-3 mt-4 border-t pt-3" style={{ borderColor: "var(--yun-line, #E8E5DF)" }}>
-          <Link href="/" className="block px-3 py-1.5 text-xs rounded" style={{ color: "var(--yun-subtext, #888780)" }}>
+        <div className="px-3 mt-4 border-t pt-3" style={{ borderColor: "var(--yun-line, #E8D9B5)" }}>
+          <Link href="/" className="block px-3 py-1.5 text-xs rounded" style={{ color: "var(--yun-subtext, #8C7660)" }}>
             前往官网
           </Link>
           <button onClick={() => signOut({ callbackUrl: "/admin/login" })}
-            className="block w-full text-left px-3 py-1.5 text-xs rounded" style={{ color: "var(--yun-subtext, #888780)" }}>
+            className="block w-full text-left px-3 py-1.5 text-xs rounded" style={{ color: "var(--yun-subtext, #8C7660)" }}>
             退出登录
           </button>
         </div>

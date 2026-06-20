@@ -8,32 +8,41 @@ export default async function AdminDashboard() {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect("/admin/login");
 
-  const [productCount, categoryCount, materialCount, journalCount, leadCount] =
-    await Promise.all([
-      prisma.product.count(),
-      prisma.objectCategory.count(),
-      prisma.material.count(),
-      prisma.journalPost.count(),
-      prisma.contactLead.count(),
-    ]);
+  // 安全地获取统计数据，容错处理
+  let stats: { label: string; value: number; href: string; color: string }[] = [];
+  let recentJournals: { id: string; title: string; status: string; updatedAt: Date }[] = [];
+  let recentProducts: { id: number; name: string; status: string; updatedAt: Date }[] = [];
 
-  const recentJournals = await prisma.journalPost.findMany({
-    take: 5, orderBy: { updatedAt: "desc" },
-    select: { id: true, title: true, status: true, updatedAt: true },
-  });
+  try {
+    const [productCount, categoryCount, materialCount, journalCount, leadCount] =
+      await Promise.all([
+        prisma.product.count(),
+        prisma.objectCategory.count(),
+        prisma.material.count(),
+        prisma.journalPost.count(),
+        prisma.contactLead.count(),
+      ]);
 
-  const recentProducts = await prisma.product.findMany({
-    take: 5, orderBy: { updatedAt: "desc" },
-    select: { id: true, name: true, status: true, updatedAt: true },
-  });
+    stats = [
+      { label: "作品总数", value: productCount, href: "/admin/products", color: "var(--yun-accent)" },
+      { label: "器物分类", value: categoryCount, href: "/admin/objects", color: "#639922" },
+      { label: "材料数量", value: materialCount, href: "/admin/materials", color: "#378ADD" },
+      { label: "品牌志", value: journalCount, href: "/admin/journal", color: "#993556" },
+      { label: "潜在线索", value: leadCount, href: "/admin/leads", color: "#BA7517" },
+    ];
 
-  const stats = [
-    { label: "作品总数", value: productCount, href: "/admin/products", color: "var(--yun-accent)" },
-    { label: "器物分类", value: categoryCount, href: "/admin/objects", color: "#639922" },
-    { label: "材料数量", value: materialCount, href: "/admin/materials", color: "#378ADD" },
-    { label: "品牌志", value: journalCount, href: "/admin/journal", color: "#993556" },
-    { label: "潜在线索", value: leadCount, href: "/admin/leads", color: "#BA7517" },
-  ];
+    recentJournals = await prisma.journalPost.findMany({
+      take: 5, orderBy: { updatedAt: "desc" },
+      select: { id: true, title: true, status: true, updatedAt: true },
+    });
+
+    recentProducts = await prisma.product.findMany({
+      take: 5, orderBy: { updatedAt: "desc" },
+      select: { id: true, name: true, status: true, updatedAt: true },
+    });
+  } catch (error) {
+    console.error("[Admin Dashboard] 数据加载失败:", error);
+  }
 
   return (
     <div>

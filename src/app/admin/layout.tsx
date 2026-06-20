@@ -24,6 +24,11 @@ const navItems = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
+  // 登录页不渲染管理后台框架（侧边栏）
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
+  }
+
   return (
     <div className="flex min-h-screen" style={{ background: "var(--yun-bg, #FAFAF9)" }}>
       {/* Sidebar */}

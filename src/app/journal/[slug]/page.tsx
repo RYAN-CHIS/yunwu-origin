@@ -1,4 +1,4 @@
-import { db } from '@/lib/db'
+import prisma from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -11,7 +11,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const post = await db.journalPost.findUnique({
+  const post = await prisma.journalPost.findUnique({
     where: { slug, status: 'PUBLISHED' },
   })
 
@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function JournalPostPage({ params }: Props) {
   const { slug } = await params
-  const post = await db.journalPost.findUnique({
+  const post = await prisma.journalPost.findUnique({
     where: { slug, status: 'PUBLISHED' },
   })
 
@@ -40,7 +40,7 @@ export default async function JournalPostPage({ params }: Props) {
 
   // Get prev/next posts
   const [prevPost, nextPost] = await Promise.all([
-    db.journalPost.findFirst({
+    prisma.journalPost.findFirst({
       where: {
         status: 'PUBLISHED',
         publishedAt: { lt: post.publishedAt || new Date() },
@@ -48,7 +48,7 @@ export default async function JournalPostPage({ params }: Props) {
       orderBy: { publishedAt: 'desc' },
       select: { id: true, title: true, slug: true },
     }),
-    db.journalPost.findFirst({
+    prisma.journalPost.findFirst({
       where: {
         status: 'PUBLISHED',
         publishedAt: { gt: post.publishedAt || new Date() },
@@ -167,7 +167,7 @@ export default async function JournalPostPage({ params }: Props) {
 }
 
 export async function generateStaticParams() {
-  const posts = await db.journalPost.findMany({
+  const posts = await prisma.journalPost.findMany({
     where: { status: 'PUBLISHED' },
     select: { slug: true },
   })

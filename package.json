@@ -18,7 +18,6 @@
     "@prisma/client": "^6.0.0",
     "@vercel/blob": "^2.4.1",
     "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^12.11.1",
     "next": "^15.0.0",
     "next-auth": "^4.24.14",
     "pg": "^8.22.0",

@@ -1,4 +1,4 @@
-import { db } from '@/lib/db'
+import prisma from '@/lib/prisma'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -30,12 +30,12 @@ export default async function JournalPage({
       : {}),
   }
 
-  const posts = await db.journalPost.findMany({
+  const posts = await prisma.journalPost.findMany({
     where,
     orderBy: { publishedAt: 'desc' },
   })
 
-  const allPosts = await db.journalPost.findMany({
+  const allPosts = await prisma.journalPost.findMany({
     where: { status: 'PUBLISHED' },
     select: { category: true },
   })

@@ -1,4 +1,4 @@
-import { db } from '@/lib/db'
+import prisma from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const lead = await db.contactLead.create({
+    const lead = await prisma.contactLead.create({
       data: {
         name,
         wechat: wechat || null,

@@ -1,214 +1,107 @@
-import { db } from '@/lib/db'
-import { redirect } from 'next/navigation'
-import { revalidatePath } from 'next/cache'
+"use client";
+export const dynamic = 'force-dynamic'
 
-const categories = [
-  { value: 'OBJECT',     label: '器物' },
-  { value: 'MATERIAL',   label: '材料' },
-  { value: 'CRAFT',      label: '工艺' },
-  { value: 'DONGHAI',    label: '东海' },
-  { value: 'CREATION',   label: '创作' },
-  { value: 'PHILOSOPHY', label: '哲思' },
-]
 
-export const metadata = {
-  title: '新建文章｜允物后台',
-}
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createJournalPost } from "@/lib/actions/admin-actions";
 
-function slugify(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[\s]+/g, '-')
-    .replace(/[^\w\u4e00-\u9fa5-]/g, '')
-}
+const categories: Record<string, string> = {
+  OBJECT: "器物", MATERIAL: "材料", CRAFT: "工艺",
+  DONGHAI: "东海", CREATION: "创作", PHILOSOPHY: "哲思",
+};
 
-export default function NewJournalPostPage() {
-  async function createPost(formData: FormData) {
-    'use server'
+export default function AdminJournalNewPage() {
+  const router = useRouter();
+  const [form, setForm] = useState({
+    title: "", slug: "", excerpt: "", content: "", coverImage: "",
+    category: "OBJECT", status: "DRAFT",
+    seoTitle: "", seoDescription: "",
+  });
+  const [loading, setLoading] = useState(false);
 
-    const title = formData.get('title') as string
-    const slug = (formData.get('slug') as string) || slugify(title)
-    const excerpt = formData.get('excerpt') as string
-    const content = formData.get('content') as string
-    const coverImage = formData.get('coverImage') as string
-    const category = formData.get('category') as any
-    const seoTitle = formData.get('seoTitle') as string
-    const seoDescription = formData.get('seoDescription') as string
-    const status = formData.get('status') as any
-    const publishNow = formData.get('publishNow') === 'on'
-
-    const post = await db.journalPost.create({
-      data: {
-        title,
-        slug,
-        excerpt: excerpt || null,
-        content,
-        coverImage: coverImage || null,
-        category,
-        seoTitle: seoTitle || null,
-        seoDescription: seoDescription || null,
-        status: publishNow ? 'PUBLISHED' : 'DRAFT',
-        publishedAt: publishNow ? new Date() : null,
-      },
-    })
-
-    revalidatePath('/journal')
-    revalidatePath(`/journal/${post.slug}`)
-    redirect('/admin/journal')
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault(); setLoading(true);
+    await createJournalPost(form as any);
+    router.push("/admin/journal");
   }
 
+  const textStyle = { color: "var(--yun-text)" };
+  const subStyle = { color: "var(--yun-subtext)" };
+  const lineStyle = { borderColor: "var(--yun-line)" };
+
   return (
-    <div className="max-w-5xl mx-auto px-6 md:px-12 py-16 md:py-24">
-      <h1 className="font-display text-2xl md:text-3xl text-yun-text tracking-wide mb-12">
-        新建文章
-      </h1>
+    <div>
+      <h1 className="text-xl font-medium tracking-[0.1em] mb-6" style={textStyle}>新建文章</h1>
 
-      <form action={createPost} className="space-y-8">
-        {/* Title */}
-        <div>
-          <label htmlFor="title" className="block text-xs text-yun-subtext tracking-wider mb-2">
-            标题 <span className="text-yun-accent">*</span>
-          </label>
-          <input
-            id="title"
-            name="title"
-            type="text"
-            required
-            className="w-full border border-yun-line bg-transparent px-4 py-3 text-yun-text text-sm focus:border-yun-accent outline-none transition-colors"
-          />
-        </div>
-
-        {/* Slug */}
-        <div>
-          <label htmlFor="slug" className="block text-xs text-yun-subtext tracking-wider mb-2">
-            Slug（留空自动生成）
-          </label>
-          <input
-            id="slug"
-            name="slug"
-            type="text"
-            placeholder="dong-hai-xun-zhu"
-            className="w-full border border-yun-line bg-transparent px-4 py-3 text-yun-text text-sm focus:border-yun-accent outline-none transition-colors"
-          />
-        </div>
-
-        {/* Category */}
-        <div>
-          <label htmlFor="category" className="block text-xs text-yun-subtext tracking-wider mb-2">
-            分类 <span className="text-yun-accent">*</span>
-          </label>
-          <select
-            id="category"
-            name="category"
-            required
-            className="w-full border border-yun-line bg-yun-bg px-4 py-3 text-yun-text text-sm focus:border-yun-accent outline-none transition-colors"
-          >
-            <option value="">请选择</option>
-            {categories.map(cat => (
-              <option key={cat.value} value={cat.value}>{cat.label}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Excerpt */}
-        <div>
-          <label htmlFor="excerpt" className="block text-xs text-yun-subtext tracking-wider mb-2">
-            摘要
-          </label>
-          <textarea
-            id="excerpt"
-            name="excerpt"
-            rows={3}
-            className="w-full border border-yun-line bg-transparent px-4 py-3 text-yun-text text-sm focus:border-yun-accent outline-none transition-colors resize-none"
-          />
-        </div>
-
-        {/* Cover Image */}
-        <div>
-          <label htmlFor="coverImage" className="block text-xs text-yun-subtext tracking-wider mb-2">
-            封面图 URL
-          </label>
-          <input
-            id="coverImage"
-            name="coverImage"
-            type="text"
-            placeholder="https://..."
-            className="w-full border border-yun-line bg-transparent px-4 py-3 text-yun-text text-sm focus:border-yun-accent outline-none transition-colors"
-          />
-        </div>
-
-        {/* Content */}
-        <div>
-          <label htmlFor="content" className="block text-xs text-yun-subtext tracking-wider mb-2">
-            正文（Markdown） <span className="text-yun-accent">*</span>
-          </label>
-          <textarea
-            id="content"
-            name="content"
-            rows={20}
-            required
-            className="w-full border border-yun-line bg-transparent px-4 py-3 text-yun-text text-sm focus:border-yun-accent outline-none transition-colors resize-none font-mono"
-          />
-        </div>
-
-        {/* SEO */}
-        <div className="border-t border-yun-line pt-8">
-          <h3 className="font-display text-lg text-yun-text mb-6">SEO 设置</h3>
-          <div className="space-y-6">
+      <form onSubmit={handleSubmit} className="max-w-3xl space-y-4">
+        <div className="bg-white border rounded p-4 space-y-3" style={lineStyle}>
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="seoTitle" className="block text-xs text-yun-subtext tracking-wider mb-2">
-                SEO 标题
-              </label>
-              <input
-                id="seoTitle"
-                name="seoTitle"
-                type="text"
-                className="w-full border border-yun-line bg-transparent px-4 py-3 text-yun-text text-sm focus:border-yun-accent outline-none transition-colors"
-              />
+              <label className="block text-xs mb-1" style={subStyle}>标题 *</label>
+              <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
+                required className="w-full px-3 py-1.5 border text-sm bg-white" style={lineStyle} />
             </div>
             <div>
-              <label htmlFor="seoDescription" className="block text-xs text-yun-subtext tracking-wider mb-2">
-                SEO 描述
-              </label>
-              <textarea
-                id="seoDescription"
-                name="seoDescription"
-                rows={2}
-                className="w-full border border-yun-line bg-transparent px-4 py-3 text-yun-text text-sm focus:border-yun-accent outline-none transition-colors resize-none"
-              />
+              <label className="block text-xs mb-1" style={subStyle}>Slug</label>
+              <input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                className="w-full px-3 py-1.5 border text-sm bg-white" style={lineStyle}
+                placeholder="留空自动生成" />
             </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs mb-1" style={subStyle}>分类 *</label>
+              <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
+                className="w-full px-3 py-1.5 border text-sm bg-white" style={lineStyle}>
+                {Object.entries(categories).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs mb-1" style={subStyle}>状态</label>
+              <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}
+                className="w-full px-3 py-1.5 border text-sm bg-white" style={lineStyle}>
+                <option value="DRAFT">草稿</option>
+                <option value="PUBLISHED">发布</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs mb-1" style={subStyle}>摘要</label>
+            <input value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
+              className="w-full px-3 py-1.5 border text-sm bg-white" style={lineStyle} />
+          </div>
+          <div>
+            <label className="block text-xs mb-1" style={subStyle}>封面图 URL</label>
+            <input value={form.coverImage} onChange={(e) => setForm({ ...form, coverImage: e.target.value })}
+              className="w-full px-3 py-1.5 border text-sm bg-white" style={lineStyle} />
+          </div>
+          <div>
+            <label className="block text-xs mb-1" style={subStyle}>正文 (Markdown) *</label>
+            <textarea value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })}
+              required rows={12} className="w-full px-3 py-1.5 border text-sm bg-white font-mono" style={lineStyle} />
           </div>
         </div>
 
-        {/* Status */}
-        <div className="flex items-center gap-3">
-          <input
-            id="publishNow"
-            name="publishNow"
-            type="checkbox"
-            className="w-4 h-4 border-yun-line rounded"
-          />
-          <label htmlFor="publishNow" className="text-sm text-yun-text">
-            立即发布
-          </label>
+        <div className="bg-white border rounded p-4 space-y-3" style={lineStyle}>
+          <h2 className="text-sm font-medium" style={textStyle}>SEO 信息</h2>
+          <div>
+            <label className="block text-xs mb-1" style={subStyle}>SEO 标题</label>
+            <input value={form.seoTitle} onChange={(e) => setForm({ ...form, seoTitle: e.target.value })}
+              className="w-full px-3 py-1.5 border text-sm bg-white" style={lineStyle} />
+          </div>
+          <div>
+            <label className="block text-xs mb-1" style={subStyle}>SEO 描述</label>
+            <textarea value={form.seoDescription} onChange={(e) => setForm({ ...form, seoDescription: e.target.value })}
+              rows={2} className="w-full px-3 py-1.5 border text-sm bg-white" style={lineStyle} />
+          </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex gap-4 pt-6 border-t border-yun-line">
-          <button
-            type="submit"
-            className="px-8 py-3 bg-yun-accent text-yun-white text-sm tracking-wider hover:bg-yun-accent/90 transition-colors"
-          >
-            保存
-          </button>
-          <a
-            href="/admin/journal"
-            className="px-8 py-3 border border-yun-line text-yun-text text-sm tracking-wider hover:border-yun-accent/30 transition-colors inline-flex items-center"
-          >
-            取消
-          </a>
-        </div>
+        <button type="submit" disabled={loading}
+          className="px-6 py-2 text-sm text-white rounded" style={{ background: "var(--yun-accent)" }}>
+          {loading ? "保存中..." : "保存文章"}
+        </button>
       </form>
     </div>
-  )
+  );
 }

@@ -16,8 +16,10 @@
   },
   "dependencies": {
     "@prisma/client": "^6.0.0",
-    "better-sqlite3": "^12.11.1",
+    "@vercel/blob": "^2.4.1",
+    "bcryptjs": "^3.0.3",
     "next": "^15.0.0",
+    "next-auth": "^4.24.14",
     "pg": "^8.22.0",
     "pinyin": "^4.0.0",
     "react": "^19.0.0",

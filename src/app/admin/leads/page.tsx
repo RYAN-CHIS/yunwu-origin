@@ -1,44 +1,46 @@
-import { db } from '@/lib/db'
+import prisma from '@/lib/prisma'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata = {
-  title: '联系线索｜允物后台',
+  title: '潜在线索 · 允物后台',
 }
 
 export default async function AdminLeadsPage() {
-  const leads = await db.contactLead.findMany({
+  const leads = await prisma.contactLead.findMany({
     orderBy: { createdAt: 'desc' },
   })
 
+  const textStyle = { color: "var(--yun-text)" }
+  const subStyle = { color: "var(--yun-subtext)" }
+  const lineStyle = { borderColor: "var(--yun-line)" }
+
   return (
-    <div className="max-w-5xl mx-auto px-6 md:px-12 py-16 md:py-24">
-      <h1 className="font-display text-2xl md:text-3xl text-yun-text tracking-wide mb-12">
-        联系线索
-      </h1>
+    <div>
+      <h1 className="text-xl font-medium tracking-[0.1em] mb-6" style={textStyle}>联系线索</h1>
 
       {leads.length === 0 ? (
-        <p className="text-yun-subtext py-24 text-center">暂无线索</p>
+        <p className="py-24 text-center" style={subStyle}>暂无线索</p>
       ) : (
-        <div className="border border-yun-line overflow-hidden">
+        <div className="border overflow-hidden" style={lineStyle}>
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-yun-line">
-                <th>姓名</th>
-                <th>微信</th>
-                <th>邮箱</th>
-                <th>留言</th>
-                <th>时间</th>
+              <tr className="border-b" style={lineStyle}>
+                <th className="py-3 px-4 text-xs font-medium" style={subStyle}>姓名</th>
+                <th className="py-3 px-4 text-xs font-medium" style={subStyle}>微信</th>
+                <th className="py-3 px-4 text-xs font-medium" style={subStyle}>邮箱</th>
+                <th className="py-3 px-4 text-xs font-medium" style={subStyle}>留言</th>
+                <th className="py-3 px-4 text-xs font-medium" style={subStyle}>时间</th>
               </tr>
             </thead>
             <tbody>
-              {leads.map((lead: any) => (
-                <tr key={lead.id} className="border-b border-yun-line last:border-b-0 hover:bg-yun-bg-secondary/50">
-                  <td className="py-4 font-medium">{lead.name}</td>
-                  <td className="py-4 text-sm text-yun-subtext">{lead.weChat || '-'}</td>
-                  <td className="py-4 text-sm text-yun-subtext">{lead.email || '-'}</td>
-                  <td className="py-4 text-sm text-yun-subtext max-w-xs truncate">
-                    {lead.message || '-'}
-                  </td>
-                  <td className="py-4 text-xs text-yun-subtext">
+              {leads.map((lead) => (
+                <tr key={lead.id} className="border-b last:border-b-0" style={lineStyle}>
+                  <td className="py-3 px-4 text-sm font-medium" style={textStyle}>{lead.name}</td>
+                  <td className="py-3 px-4 text-sm" style={subStyle}>{lead.wechat || '-'}</td>
+                  <td className="py-3 px-4 text-sm" style={subStyle}>{lead.email || '-'}</td>
+                  <td className="py-3 px-4 text-sm max-w-xs truncate" style={subStyle}>{lead.message || '-'}</td>
+                  <td className="py-3 px-4 text-xs" style={subStyle}>
                     {new Date(lead.createdAt).toLocaleDateString('zh-CN')}
                   </td>
                 </tr>

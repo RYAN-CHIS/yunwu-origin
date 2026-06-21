@@ -60,7 +60,7 @@ export default async function ProductsPage() {
                   seriesName={p.series?.name}
                   seriesSlug={p.series?.slug}
                   salePrice={p.salePrice}
-                  objectCategory={p.objectCategory}
+                  objectCategory={p.object_category}
                 />
               ))}
             </div>

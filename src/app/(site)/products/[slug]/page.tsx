@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     keywords: [
       '允物', product.name, product.series?.name || '',
-      product.objectCategory || '', '东方器物',
+      product.object_category || '', '东方器物',
     ].filter(Boolean),
   };
 }

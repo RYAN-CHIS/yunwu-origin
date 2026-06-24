@@ -46,6 +46,28 @@ model Product {
   createdAt        DateTime         @default(now()) @map("created_at")
   updatedAt        DateTime         @updatedAt     @map("updated_at")
 
+  // ── PDP Layer: Value Bullets ──
+  valueBullets   String   @default("[]") @map("value_bullets")
+
+  // ── PDP Layer: Craft ──
+  craftMaterial  String?  @map("craft_material")
+  craft          String?  @map("craft")
+  craftOrigin    String?  @map("craft_origin")
+  craftTechnique String?  @map("craft_technique")
+  craftFinish    String?  @map("craft_finish")
+
+  // ── PDP Layer: Ritual ──
+  ritualType     String?  @map("ritual_type")
+  ritualFunction String?  @map("ritual_function")
+  ritualEmotion  String?  @map("ritual_emotion")
+  ritualContext  String?  @map("ritual_context")
+
+  // ── PDP Relations ──
+  batches          Batch[]
+  peerQuotes       PeerQuote[]
+  crossSells       CrossSell[]         @relation("CrossSellSource")
+  crossSellTargets  CrossSell[]        @relation("CrossSellTarget")
+
   @@index([seriesId])
   @@index([status])
   @@index([objectCategory])
@@ -154,4 +176,50 @@ model ContactLead {
 
   @@index([createdAt])
   @@map("contact_leads")
+}
+
+// ── PDP Layer: Batch（批次追踪）──
+model Batch {
+  id          Int      @id @default(autoincrement())
+  productId   Int      @map("product_id")
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  batchNumber String   @map("batch_number")
+  batchTotal  Int      @map("batch_total")
+  remaining   Int      @default(0)
+  releasedAt  DateTime? @map("released_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([productId])
+  @@map("batches")
+}
+
+// ── PDP Layer: Social Proof（同行者引用）──
+model PeerQuote {
+  id         Int      @id @default(autoincrement())
+  productId  Int      @map("product_id")
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quote      String
+  author     String?
+  source     String?  @map("source")
+  imageUrl   String?  @map("image_url")
+  sortOrder  Int      @default(0) @map("sort_order")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([productId])
+  @@map("peer_quotes")
+}
+
+// ── PDP Layer: Cross Sell（搭配推荐）──
+model CrossSell {
+  id        Int      @id @default(autoincrement())
+  productId Int      @map("product_id")
+  product   Product  @relation("CrossSellSource", fields: [productId], references: [id], onDelete: Cascade)
+  targetId  Int      @map("target_id")
+  target    Product  @relation("CrossSellTarget", fields: [targetId], references: [id], onDelete: Cascade)
+  reason    String?
+  sortOrder Int      @default(0) @map("sort_order")
+
+  @@unique([productId, targetId])
+  @@index([productId])
+  @@map("cross_sells")
 }

@@ -106,7 +106,7 @@ export default async function ProductDetailPage({ params }: Props) {
   return (
     <main className="bg-[var(--yun-paper)] min-h-screen">
       {/* YWO 部署标签 */}
-      <div aria-hidden style={{ display: 'none' }} dangerouslySetInnerHTML={{ __html: `<!-- YWO_BUILD: vPDP-1 / e1285a0 -->` }} />
+      <div aria-hidden style={{ display: 'none' }} dangerouslySetInnerHTML={{ __html: `<!-- YWO_BUILD: vPDP-1 / 4d55ba7+pdp-v1 -->` }} />
 
       {/* JSON-LD */}
       <script

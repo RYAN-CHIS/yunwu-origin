@@ -13,55 +13,13 @@ async function main() {
 
   // ── 1. 创建七序 ──
   const seriesData = [
-    {
-      slug: 'fuchu',
-      name: '芙初',
-      description: '人生最珍贵的状态，不是成功，而是第一次看见世界时的欢喜。',
-      sortOrder: 1,
-      isActive: true,
-    },
-    {
-      slug: 'qichi',
-      name: '栖迟',
-      description: '允许自己停下来，允许自己不那么着急。',
-      sortOrder: 2,
-      isActive: true,
-    },
-    {
-      slug: 'fusu',
-      name: '扶苏',
-      description: '向阳而生，成为更好的自己。',
-      sortOrder: 3,
-      isActive: true,
-    },
-    {
-      slug: 'cangming',
-      name: '沧溟',
-      description: '从关注自己，到连接更大的世界。',
-      sortOrder: 4,
-      isActive: true,
-    },
-    {
-      slug: 'jiming',
-      name: '既明',
-      description: '看见世界之后，开始看见自己。',
-      sortOrder: 5,
-      isActive: true,
-    },
-    {
-      slug: 'guanfu',
-      name: '观复',
-      description: '看遍繁华，终归本心。',
-      sortOrder: 6,
-      isActive: true,
-    },
-    {
-      slug: 'cangzhen',
-      name: '藏真',
-      description: '最终留下的，只有真实。',
-      sortOrder: 7,
-      isActive: true,
-    },
+    { slug: 'fuchu', name: '芙初', description: '人生最珍贵的状态，不是成功，而是第一次看见世界时的欢喜。', sortOrder: 1 },
+    { slug: 'qichi', name: '栖迟', description: '允许自己停下来，允许自己不那么着急。', sortOrder: 2 },
+    { slug: 'fusu', name: '扶苏', description: '向阳而生，成为更好的自己。', sortOrder: 3 },
+    { slug: 'cangming', name: '沧溟', description: '从关注自己，到连接更大的世界。', sortOrder: 4 },
+    { slug: 'jiming', name: '既明', description: '看见世界之后，开始看见自己。', sortOrder: 5 },
+    { slug: 'guanfu', name: '观复', description: '看遍繁华，终归本心。', sortOrder: 6 },
+    { slug: 'cangzhen', name: '藏真', description: '最终留下的，只有真实。', sortOrder: 7 },
   ];
 
   const seriesMap = new Map<string, number>();

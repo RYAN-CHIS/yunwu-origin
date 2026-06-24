@@ -4,6 +4,12 @@ import prisma from '@/lib/prisma';
 import { Metadata } from 'next';
 import BuyButton from './BuyButton';
 import SectionWrapper from '@/components/ui/SectionWrapper';
+import CraftGrid from '@/components/pdp/CraftGrid';
+import RitualCard from '@/components/pdp/RitualCard';
+import BatchBadge from '@/components/pdp/BatchBadge';
+import PeerQuotes from '@/components/pdp/PeerQuotes';
+import CrossSellSection from '@/components/pdp/CrossSellSection';
+import ValueBullets from '@/components/pdp/ValueBullets';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -41,15 +47,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductDetailPage({ params }: Props) {
   const { slug } = await params;
+
   const product = await prisma.product.findUnique({
     where: { slug },
     include: {
       series: true,
       materialsRelation: { include: { material: true } },
+      batches: { orderBy: { createdAt: 'desc' }, take: 1 },
+      peerQuotes: { orderBy: { sortOrder: 'asc' } },
+      crossSells: {
+        include: { target: { select: { slug: true, name: true, salePrice: true, coverImage: true } } },
+        orderBy: { sortOrder: 'asc' },
+      },
     },
   });
 
   if (!product || product.status !== 'PUBLISHED') notFound();
+
+  // 解析 Value Bullets
+  let valueBullets: string[] = [];
+  try {
+    valueBullets = JSON.parse(product.valueBullets || '[]');
+  } catch { valueBullets = []; }
 
   // 相关作品：同序的其他作品
   const related = await prisma.product.findMany({
@@ -86,6 +105,9 @@ export default async function ProductDetailPage({ params }: Props) {
 
   return (
     <main className="bg-[var(--yun-paper)] min-h-screen">
+      {/* YWO 部署标签 */}
+      <div aria-hidden style={{ display: 'none' }} dangerouslySetInnerHTML={{ __html: `<!-- YWO_BUILD: vPDP-1 / e1285a0 -->` }} />
+
       {/* JSON-LD */}
       <script
         type="application/ld+json"
@@ -103,13 +125,20 @@ export default async function ProductDetailPage({ params }: Props) {
             <span className="text-[var(--yun-ink)]">{product.name}</span>
           </nav>
 
-          {/* 产品布局 */}
+          {/* ═══ Layer 1: HERO（产品布局）═══ */}
           <div className="grid md:grid-cols-2 gap-16">
             {/* 左：封面 */}
-            <div className="aspect-[3/4] bg-[var(--yun-hover)] rounded-[var(--yun-radius)] flex items-center justify-center">
-              <span className="text-[12rem] leading-none font-display text-[var(--yun-ink)]/5">
-                {product.name.charAt(0)}
-              </span>
+            <div className="aspect-[3/4] bg-[var(--yun-hover)] rounded-[var(--yun-radius)] flex items-center justify-center overflow-hidden relative group">
+              {product.coverImage ? (
+                <div
+                  className="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                  style={{ backgroundImage: `url(${product.coverImage})` }}
+                />
+              ) : (
+                <span className="text-[12rem] leading-none font-display text-[var(--yun-ink)]/5">
+                  {product.name.charAt(0)}
+                </span>
+              )}
             </div>
 
             {/* 右：信息 */}
@@ -130,7 +159,7 @@ export default async function ProductDetailPage({ params }: Props) {
               {/* 购买按钮 */}
               <BuyButton productSlug={product.slug} productName={product.name} price={product.salePrice} />
 
-              {/* 材料 */}
+              {/* 材料链接 */}
               {product.materialsRelation.length > 0 && (
                 <div className="mt-8 pt-8 border-t border-[var(--yun-border)]/30">
                   <h3 className="text-sm font-light tracking-wider text-[var(--yun-ink)] mb-3">材料</h3>
@@ -148,16 +177,53 @@ export default async function ProductDetailPage({ params }: Props) {
                 </div>
               )}
 
-              {/* 库存 */}
+              {/* 库存提醒 */}
               {product.stock <= 10 && product.stock > 0 && (
                 <p className="text-xs text-[var(--yun-jade)]/60 mt-4">仅剩 {product.stock} 件</p>
               )}
             </div>
           </div>
 
-          {/* 作品故事 */}
+          {/* ═══ Layer 2: VALUE BULLETS ═══ */}
+          <ValueBullets bullets={valueBullets} />
+
+          {/* ═══ Layer 3: CRAFT LAYER ═══ */}
+          <CraftGrid
+            data={{
+              craftMaterial: product.craftMaterial,
+              craft: product.craft,
+              craftOrigin: product.craftOrigin,
+              craftTechnique: product.craftTechnique,
+              craftFinish: product.craftFinish,
+            }}
+          />
+
+          {/* ═══ Layer 4: RITUAL LAYER ═══ */}
+          <RitualCard
+            data={{
+              ritualType: product.ritualType,
+              ritualFunction: product.ritualFunction,
+              ritualEmotion: product.ritualEmotion,
+              ritualContext: product.ritualContext,
+            }}
+          />
+
+          {/* ═══ Layer 5: BATCH LAYER ═══ */}
+          <BatchBadge
+            batch={
+              product.batches[0]
+                ? {
+                    batchNumber: product.batches[0].batchNumber,
+                    batchTotal: product.batches[0].batchTotal,
+                    remaining: product.batches[0].remaining,
+                  }
+                : null
+            }
+          />
+
+          {/* ═══ Layer 6: STORY（作品故事）═══ */}
           <section className="max-w-2xl mx-auto py-20">
-            <h2 className="text-center text-sm font-light tracking-[0.15em] text-[var(--yun-gray)] mb-10">作品故事</h2>
+            <h2 className="text-center text-[11px] font-light tracking-[0.15em] text-[var(--yun-gray)] mb-10">作品故事</h2>
             <div className="text-sm leading-loose text-[var(--yun-ink)]/70 space-y-4">
               {product.story.split('\n').map((para, i) => (
                 <p key={i}>{para}</p>
@@ -165,12 +231,37 @@ export default async function ProductDetailPage({ params }: Props) {
             </div>
             <div className="mt-8 pt-8 border-t border-[var(--yun-border)]/30">
               <p className="text-xs text-[var(--yun-gray)]">
-                材料清单：{product.materials}
+                材料清单：{product.materials || '—'}
               </p>
             </div>
           </section>
 
-          {/* 允许承诺 */}
+          {/* ═══ Layer 7: SOCIAL PROOF ═══ */}
+          <PeerQuotes
+            quotes={product.peerQuotes.map((q) => ({
+              id: q.id,
+              quote: q.quote,
+              author: q.author,
+              source: q.source,
+              imageUrl: q.imageUrl,
+            }))}
+          />
+
+          {/* ═══ Layer 8: CROSS SELL ═══ */}
+          <CrossSellSection
+            crossSells={product.crossSells.map((cs) => ({
+              targetId: cs.targetId,
+              reason: cs.reason,
+              target: {
+                slug: cs.target.slug,
+                name: cs.target.name,
+                salePrice: cs.target.salePrice,
+                coverImage: cs.target.coverImage,
+              },
+            }))}
+          />
+
+          {/* 允物承诺 */}
           <section className="max-w-2xl mx-auto pb-20">
             <div className="bg-[var(--yun-hover)] border border-[var(--yun-border)]/20 rounded-[var(--yun-radius)] p-8">
               <h3 className="text-sm font-light tracking-wider text-[var(--yun-ink)] mb-4">允物承诺</h3>

@@ -24,9 +24,11 @@ model Series {
   @@map("series")
 }
 
-// ── 器物（作品） ──
+// ── 器物（作品）— V2.2 with Product OS fields ──
 model Product {
   id               Int              @id @default(autoincrement())
+
+  // V1.x 基础字段
   sku              String           @unique
   name             String
   slug             String           @unique
@@ -43,12 +45,45 @@ model Product {
   gallery          String           @default("[]")
   stock            Int              @default(0)
   status           String           @default("draft")
-  createdAt        DateTime         @default(now()) @map("created_at")
-  updatedAt        DateTime         @updatedAt     @map("updated_at")
+
+  // ── Product OS V2.2 发布控制 ──
+  publishStatus    PublishStatus    @default(DRAFT) @map("publish_status")
+  publishedAt      DateTime?        @map("published_at")
+  productType      ProductType      @default(STANDARD) @map("product_type")
+
+  // ── V2.2 PDP 字段 ──
+  valueBullets     Json?            @map("value_bullets")
+  originPlace      String?          @map("origin_place")
+  technique        String?
+  finish           String?
+  materialOrigin   String?          @map("material_origin")
+  craftMethod      String?          @map("craft_method")
+  completionDate   DateTime?        @map("completion_date")
+  serialNumber     String?          @map("serial_number")
+  creationStory    String?          @map("creation_story")
+  emotionalState   String?          @map("emotional_state")
+  artisanStory     String?          @map("artisan_story")
+  companionsCount  Int              @default(0) @map("companions_count")
+  remainingQty     Int?             @map("remaining_qty")
+
+  // ── 仪式分类关联 ──
+  ritualTaxonomyId Int?             @map("ritual_taxonomy_id")
+  ritualTaxonomy   RitualTaxonomy?  @relation(fields: [ritualTaxonomyId], references: [id])
+
+  // ── 关联 ──
+  batches            Batch[]
+  quotes             CustomerQuote[]
+  outgoingCrossSells CrossSellRelation[] @relation("FromProduct")
+  incomingCrossSells CrossSellRelation[] @relation("ToProduct")
+
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt      @map("updated_at")
 
   @@index([seriesId])
   @@index([status])
   @@index([objectCategory])
+  @@index([publishStatus])
+  @@index([ritualTaxonomyId])
   @@map("products")
 }
 
@@ -60,6 +95,104 @@ enum ObjectCategory {
   CERAMIC    // 瓷器
   ENAMEL     // 珐琅
   SCHOLAR    // 文房
+}
+
+// ── 发布状态（V2.2 扩展） ──
+enum PublishStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  PUBLISHED
+  UNPUBLISHED
+  ARCHIVED
+}
+
+// ── Product OS 产品类型 ──
+enum ProductType {
+  STANDARD
+  BATCHED
+}
+
+// ── 批次管理（V2.2） ──
+model Batch {
+  id           Int      @id @default(autoincrement())
+  productId    Int      @map("product_id")
+  batchNumber  Int      @map("batch_number")
+  batchCode    String   @unique @map("batch_code")
+  totalQty     Int      @map("total_qty")
+  remainingQty Int      @map("remaining_qty")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, batchNumber])
+  @@index([productId])
+  @@map("batches")
+}
+
+// ── 仪式分类（V2.2） ──
+model RitualTaxonomy {
+  id               Int        @id @default(autoincrement())
+  code             String     @unique
+  ritualType       String     @map("ritual_type")
+  symbolicFunction String     @map("symbolic_function")
+  emotionalState   String     @map("emotional_state")
+  dailyContext     String     @map("daily_context")
+  description      String?
+  createdAt        DateTime   @default(now()) @map("created_at")
+  updatedAt        DateTime   @updatedAt @map("updated_at")
+  products         Product[]
+
+  @@map("ritual_taxonomies")
+}
+
+// ── 客户语录（V2.2） ──
+model CustomerQuote {
+  id           Int         @id @default(autoincrement())
+  productId    Int         @map("product_id")
+  customerName String      @map("customer_name")
+  content      String
+  isApproved   Boolean     @default(false) @map("is_approved")
+  sortOrder    Int         @default(0) @map("sort_order")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+  product      Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, isApproved])
+  @@map("customer_quotes")
+}
+
+// ── 交叉销售关系（V2.2） ──
+model CrossSellRelation {
+  id            Int      @id @default(autoincrement())
+  fromProductId Int      @map("from_product_id")
+  toProductId   Int      @map("to_product_id")
+  reason        String
+  sortOrder     Int      @default(0) @map("sort_order")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  fromProduct   Product  @relation("FromProduct", fields: [fromProductId], references: [id], onDelete: Cascade)
+  toProduct     Product  @relation("ToProduct", fields: [toProductId], references: [id], onDelete: Cascade)
+
+  @@unique([fromProductId, toProductId])
+  @@index([fromProductId])
+  @@index([toProductId])
+  @@map("cross_sell_relations")
+}
+
+// ── 审计日志（V2.2） ──
+model JournalEntry {
+  id         Int      @id @default(autoincrement())
+  entityType String   @map("entity_type")
+  entityId   Int      @map("entity_id")
+  action     String
+  summary    String
+  metadata   String?
+  operatorId Int?     @map("operator_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([entityType, entityId])
+  @@map("journal_entries")
 }
 
 // ── 材料库 ──
@@ -128,19 +261,13 @@ model JournalPost {
   @@map("journal_posts")
 }
 
-// 品牌志分类：器物、材料、工艺、东海、创作、哲思
 enum JournalCategory {
-  OBJECT      // 器物
-  MATERIAL    // 材料
-  CRAFT       // 工艺
-  DONGHAI     // 东海
-  CREATION    // 创作
-  PHILOSOPHY  // 哲思
-}
-
-enum PublishStatus {
-  DRAFT
-  PUBLISHED
+  OBJECT
+  MATERIAL
+  CRAFT
+  DONGHAI
+  CREATION
+  PHILOSOPHY
 }
 
 // ── 联系表单线索 ──

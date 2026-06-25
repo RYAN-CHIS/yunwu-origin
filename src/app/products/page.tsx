@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import prisma from '@/lib/prisma';
+import { getPublishedProducts } from '@/lib/product-os';
 import SectionWrapper from '@/components/ui/SectionWrapper';
 import ProductCard from '@/components/ui/ProductCard';
 
@@ -9,16 +9,12 @@ export const metadata = {
 };
 
 export default async function ProductsPage() {
-  const products = await prisma.product.findMany({
-    where: { status: 'PUBLISHED' },
-    include: { series: true },
-    orderBy: [{ series: { sortOrder: 'asc' } }, { salePrice: 'asc' }],
-  });
+  const products = await getPublishedProducts();
 
   // 按序分组
   const grouped: Record<string, typeof products> = {};
   for (const p of products) {
-    const key = p.series.name;
+    const key = p.seriesName;
     if (!grouped[key]) grouped[key] = [];
     grouped[key].push(p);
   }
@@ -57,8 +53,8 @@ export default async function ProductsPage() {
                   slug={p.slug}
                   name={p.name}
                   coverImage={p.coverImage}
-                  seriesName={p.series?.name}
-                  seriesSlug={p.series?.slug}
+                  seriesName={p.seriesName}
+                  seriesSlug={p.seriesSlug}
                   salePrice={p.salePrice}
                   objectCategory={p.objectCategory}
                 />

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Metadata } from 'next';
-import prisma from '@/lib/prisma';
 import { ObjectCategory } from '@prisma/client';
+import { getPublishedProducts } from '@/lib/product-os';
 import SectionWrapper from '@/components/ui/SectionWrapper';
 
 export const metadata: Metadata = {
@@ -26,15 +26,9 @@ export default async function ObjectsPage({
   const params = await searchParams;
   const activeCategory = params.category as ObjectCategory | undefined;
 
-  const where = {
-    status: 'PUBLISHED',
-    ...(activeCategory ? { objectCategory: activeCategory } : {}),
-  };
-
-  const products = await prisma.product.findMany({
-    where,
-    include: { series: true },
-    orderBy: { createdAt: 'desc' },
+  const products = await getPublishedProducts({
+    category: activeCategory,
+    orderBy: 'newest',
   });
 
   return (
@@ -125,10 +119,10 @@ export default async function ObjectsPage({
                 </div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs text-[var(--yun-jade)]/60 tracking-wider">
-                    {categoryConfig[p.objectCategory]?.name}
+                    {categoryConfig[p.objectCategory as ObjectCategory]?.name}
                   </span>
                   <span className="text-xs text-[var(--yun-gray)]/30">·</span>
-                  <span className="text-xs text-[var(--yun-gray)] tracking-wider">{p.series.name}</span>
+                  <span className="text-xs text-[var(--yun-gray)] tracking-wider">{p.seriesName}</span>
                 </div>
                 <h3 className="text-base font-light tracking-wider mb-1 group-hover:text-[var(--yun-jade)] transition-colors text-[var(--yun-ink)]">
                   {p.name}

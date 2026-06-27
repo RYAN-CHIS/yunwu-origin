@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import prisma from '@/lib/prisma';
+import { getPublishedProducts } from '@/lib/product-os';
 import { Button, ProductCard, ContentCard, SectionWrapper } from '@/components/ui';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
@@ -52,13 +53,8 @@ export default async function HomePage() {
   const [siteSettings, featuredProducts, seriesList, journalPosts] =
     await Promise.all([
       getSiteSettings(),
-      // Featured Products: 每类取 2 件
-      prisma.product.findMany({
-        where: { status: 'PUBLISHED' },
-        include: { series: true },
-        take: 8,
-        orderBy: { createdAt: 'desc' },
-      }),
+      // Featured Products: latest 8
+      getPublishedProducts({ take: 8, orderBy: 'newest' }),
       // Series
       prisma.series.findMany({
         orderBy: { sortOrder: 'asc' },
@@ -155,8 +151,8 @@ export default async function HomePage() {
                 slug={product.slug}
                 name={product.name}
                 coverImage={product.coverImage}
-                seriesName={product.series?.name}
-                seriesSlug={product.series?.slug}
+                seriesName={product.seriesName}
+                seriesSlug={product.seriesSlug}
                 salePrice={product.salePrice}
                 objectCategory={product.objectCategory}
               />

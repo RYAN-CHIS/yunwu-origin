@@ -5,6 +5,7 @@
  * and is exposed as code in the view model.
  */
 import prisma from '@/lib/prisma';
+import type { Prisma } from '@prisma/client';
 
 const PUBLISHED_STATUS = 'PUBLISHED';
 
@@ -36,11 +37,37 @@ export interface ProductSku {
   }>;
 }
 
-export async function getPublishedProducts(): Promise<ProductSku[]> {
+export interface ProductQueryOptions {
+  /** Limit the number of results */
+  take?: number;
+  /** Filter by object category */
+  category?: string;
+  /**
+   * Sort order.
+   * - `'default'`: series.sortOrder asc, salePrice asc
+   * - `'newest'`: createdAt desc
+   * @default 'default'
+   */
+  orderBy?: 'default' | 'newest';
+}
+
+export async function getPublishedProducts(options?: ProductQueryOptions): Promise<ProductSku[]> {
+  const where: Record<string, unknown> = { status: PUBLISHED_STATUS };
+
+  if (options?.category) {
+    where.objectCategory = options.category;
+  }
+
+  const orderBy: Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[] =
+    options?.orderBy === 'newest'
+      ? { createdAt: 'desc' }
+      : [{ series: { sortOrder: 'asc' } }, { salePrice: 'asc' }];
+
   const products = await prisma.product.findMany({
-    where: { status: PUBLISHED_STATUS },
+    where,
     include: { series: true },
-    orderBy: [{ series: { sortOrder: 'asc' } }, { salePrice: 'asc' }],
+    orderBy,
+    ...(options?.take ? { take: options.take } : {}),
   });
 
   return products.map(toProductSku);

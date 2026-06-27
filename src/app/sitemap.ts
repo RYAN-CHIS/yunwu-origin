@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import prisma from '@/lib/prisma';
+import { getPublishedProducts } from '@/lib/product-os';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.yunwuorigin.com';
@@ -15,11 +16,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: 'monthly' as const, priority: 0.5 },
   ];
 
-  // Dynamic product pages
-  const products = await prisma.product.findMany({
-    where: { status: 'PUBLISHED' },
-    select: { slug: true, updatedAt: true },
-  });
+  // Dynamic product pages — via Product OS
+  const products = await getPublishedProducts();
   const productPages = products.map((p) => ({
     url: `${baseUrl}/products/${p.slug}`,
     lastModified: p.updatedAt,

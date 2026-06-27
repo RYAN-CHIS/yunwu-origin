@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import prisma from '@/lib/prisma';
+import { getPublishedProducts } from '@/lib/product-os';
 import { Metadata } from 'next';
-import type { Prisma } from '@prisma/client';
 import SectionWrapper from '@/components/ui/SectionWrapper';
 import ProductCard from '@/components/ui/ProductCard';
 
@@ -46,29 +46,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-// Fields that exist in the current production database.
-// V2.2-only fields are excluded until the database migration is completed.
-const PRODUCT_SELECT = {
-  id: true,
-  slug: true,
-  name: true,
-  coverImage: true,
-  salePrice: true,
-  objectCategory: true,
-} satisfies Prisma.ProductSelect;
-
 export default async function SeriesPage({ params }: Props) {
   const { slug } = await params;
-  const series = await prisma.series.findUnique({
-    where: { slug },
-    include: {
-      products: {
-        where: { status: 'PUBLISHED' },
-        orderBy: { salePrice: 'asc' },
-        select: PRODUCT_SELECT,
-      },
-    },
-  });
+  const [series, products] = await Promise.all([
+    prisma.series.findUnique({ where: { slug } }),
+    getPublishedProducts({ seriesSlug: slug }),
+  ]);
 
   if (!series) notFound();
 
@@ -109,11 +92,11 @@ export default async function SeriesPage({ params }: Props) {
           {series.name} · 作品
         </h2>
 
-        {series.products.length === 0 ? (
+        {products.length === 0 ? (
           <p className="text-center text-sm text-[var(--yun-gray)]">作品筹备中</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {series.products.map((p) => (
+            {products.map((p) => (
               <ProductCard
                 key={p.id}
                 slug={p.slug}

@@ -7,6 +7,8 @@
 import prisma from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
 
+export type ProductOrderBy = Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[];
+
 const PUBLISHED_STATUS = 'PUBLISHED';
 
 export interface ProductSku {
@@ -26,6 +28,7 @@ export interface ProductSku {
   salePrice: number;
   stock: number;
   publishStatus: string;
+  updatedAt: Date;
   materialsRelation: Array<{
     id: number;
     material: {
@@ -42,6 +45,8 @@ export interface ProductQueryOptions {
   take?: number;
   /** Filter by object category */
   category?: string;
+  /** Filter by series slug */
+  seriesSlug?: string;
   /**
    * Sort order.
    * - `'default'`: series.sortOrder asc, salePrice asc
@@ -75,13 +80,17 @@ const PRODUCT_SELECT = {
 } as const;
 
 export async function getPublishedProducts(options?: ProductQueryOptions): Promise<ProductSku[]> {
-  const where: Record<string, unknown> = { status: PUBLISHED_STATUS };
+  const where: Prisma.ProductWhereInput = { status: PUBLISHED_STATUS };
 
   if (options?.category) {
-    where.objectCategory = options.category;
+    where.objectCategory = options.category as any;
   }
 
-  const orderBy: Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[] =
+  if (options?.seriesSlug) {
+    where.series = { slug: options.seriesSlug };
+  }
+
+  const orderBy: ProductOrderBy =
     options?.orderBy === 'newest'
       ? { createdAt: 'desc' }
       : [{ series: { sortOrder: 'asc' } }, { salePrice: 'asc' }];
@@ -144,6 +153,7 @@ function toProductSku(product: any): ProductSku {
     salePrice: product.salePrice,
     stock: product.stock,
     publishStatus: product.status,
+    updatedAt: product.updatedAt,
     materialsRelation: product.materialsRelation || [],
   };
 }

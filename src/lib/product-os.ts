@@ -51,6 +51,29 @@ export interface ProductQueryOptions {
   orderBy?: 'default' | 'newest';
 }
 
+// Fields that exist in the current production database.
+// V2.2-only fields (publishStatus, productType, valueBullets, etc.) are excluded
+// until the database migration is completed.
+const PRODUCT_SELECT = {
+  id: true,
+  sku: true,
+  name: true,
+  slug: true,
+  seriesId: true,
+  objectCategory: true,
+  theme: true,
+  story: true,
+  materials: true,
+  costPrice: true,
+  salePrice: true,
+  coverImage: true,
+  gallery: true,
+  stock: true,
+  status: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
+
 export async function getPublishedProducts(options?: ProductQueryOptions): Promise<ProductSku[]> {
   const where: Record<string, unknown> = { status: PUBLISHED_STATUS };
 
@@ -65,7 +88,10 @@ export async function getPublishedProducts(options?: ProductQueryOptions): Promi
 
   const products = await prisma.product.findMany({
     where,
-    include: { series: true },
+    select: {
+      ...PRODUCT_SELECT,
+      series: { select: { id: true, name: true, slug: true, sortOrder: true } },
+    },
     orderBy,
     ...(options?.take ? { take: options.take } : {}),
   });
@@ -76,9 +102,15 @@ export async function getPublishedProducts(options?: ProductQueryOptions): Promi
 export async function getPublishedProduct(slug: string): Promise<ProductSku | null> {
   const product = await prisma.product.findFirst({
     where: { slug, status: PUBLISHED_STATUS },
-    include: {
-      series: true,
-      materialsRelation: { include: { material: true } },
+    select: {
+      ...PRODUCT_SELECT,
+      series: { select: { id: true, name: true, slug: true, sortOrder: true } },
+      materialsRelation: {
+        select: {
+          id: true,
+          material: { select: { id: true, name: true, type: true, origin: true } },
+        },
+      },
     },
   });
 

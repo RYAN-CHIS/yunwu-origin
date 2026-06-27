@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import { Metadata } from 'next';
+import type { Prisma } from '@prisma/client';
 import SectionWrapper from '@/components/ui/SectionWrapper';
 import ProductCard from '@/components/ui/ProductCard';
 
@@ -45,6 +46,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+// Fields that exist in the current production database.
+// V2.2-only fields are excluded until the database migration is completed.
+const PRODUCT_SELECT = {
+  id: true,
+  slug: true,
+  name: true,
+  coverImage: true,
+  salePrice: true,
+  objectCategory: true,
+} satisfies Prisma.ProductSelect;
+
 export default async function SeriesPage({ params }: Props) {
   const { slug } = await params;
   const series = await prisma.series.findUnique({
@@ -53,6 +65,7 @@ export default async function SeriesPage({ params }: Props) {
       products: {
         where: { status: 'PUBLISHED' },
         orderBy: { salePrice: 'asc' },
+        select: PRODUCT_SELECT,
       },
     },
   });

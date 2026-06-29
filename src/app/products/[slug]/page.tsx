@@ -5,6 +5,7 @@ import BuyButton from './BuyButton';
 import SectionWrapper from '@/components/ui/SectionWrapper';
 import ProductGallery from '@/components/ui/ProductGallery';
 import { getPublishedProduct, getPublishedProducts } from '@/lib/product-os';
+import { getSeoConfig, SITE_URL, toMetadata } from '@/lib/seo';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -17,24 +18,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!product) return {};
 
-  const title = product.code
-    ? `${product.name}｜${product.seriesName || ''}｜允物`
-    : `${product.name}｜允物`;
+  const productsSeo = await getSeoConfig('products');
+  const title = `${product.name}｜允物`;
+  const description = product.story || productsSeo.description;
 
-  return {
+  return toMetadata(productsSeo, {
     title,
-    description: product.story || product.theme || `${product.name} — 允物东方器物作品`,
-    openGraph: {
-      title,
-      description: product.story || product.theme || '',
-      type: 'website',
-      images: product.coverImage ? [product.coverImage] : [],
-    },
+    description,
+    ogTitle: title,
+    ogDescription: description,
+    ogImage: product.coverImage || productsSeo.ogImage,
+    canonical: `${SITE_URL}/products/${product.slug}`,
     keywords: [
       '允物', product.name, product.seriesName || '',
       product.objectCategory || '', '东方器物',
     ].filter(Boolean),
-  };
+  });
 }
 
 export default async function ProductDetailPage({ params }: Props) {

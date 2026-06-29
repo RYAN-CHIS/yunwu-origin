@@ -5,24 +5,12 @@ import { Button, ProductCard, ContentCard, SectionWrapper } from '@/components/u
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { Metadata } from 'next';
+import { getSeoConfig, toMetadata } from '@/lib/seo';
 
 // ── SEO Metadata ──
-export const metadata: Metadata = {
-  title: '允物｜东方器物品牌',
-  description:
-    '允物是一个东方审美现代器物品牌，以七序世界观为精神脉络，传承东方手作美学。让物归物，让心归心。',
-  openGraph: {
-    title: '允物｜东方器物品牌',
-    description:
-      '允物是一个东方审美现代器物品牌，以七序世界观为精神脉络，传承东方手作美学。',
-    type: 'website',
-    locale: 'zh_CN',
-  },
-  keywords: [
-    '允物', '东方器物', '手串', '篆刻', '沉香', '水晶', '东方美学',
-    '品牌故事', '七序', '见素抱朴',
-  ],
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return toMetadata(await getSeoConfig('home'));
+}
 
 // ── 读取站点配置 ──
 async function getSiteSettings() {

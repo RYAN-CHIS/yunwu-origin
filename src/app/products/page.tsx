@@ -2,11 +2,12 @@ import Link from 'next/link';
 import { getPublishedProducts } from '@/lib/product-os';
 import SectionWrapper from '@/components/ui/SectionWrapper';
 import ProductCard from '@/components/ui/ProductCard';
+import { getSeoConfig, toMetadata } from '@/lib/seo';
+import type { Metadata } from 'next';
 
-export const metadata = {
-  title: '全部作品｜允物',
-  description: '浏览允物全部作品，探索七序体系中的每一件器物。每一件作品都是东方审美与现代生活的相遇。',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return toMetadata(await getSeoConfig('products'));
+}
 
 export default async function ProductsPage() {
   const products = await getPublishedProducts();

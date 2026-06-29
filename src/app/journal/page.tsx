@@ -2,10 +2,10 @@ import prisma from '@/lib/prisma';
 import { Metadata } from 'next';
 import { ContentCard } from '@/components/ui';
 import SectionWrapper from '@/components/ui/SectionWrapper';
+import { getSeoConfig, toMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: '允物品牌志｜器物之道，不在拥有，而在观照',
-  description: '器物、材料、工艺、东海、创作、哲思。允物品牌志记录东方器物美学的探索之路。',
+export async function generateMetadata(): Promise<Metadata> {
+  return toMetadata(await getSeoConfig('journal'));
 }
 
 const categoryLabels: Record<string, string> = {

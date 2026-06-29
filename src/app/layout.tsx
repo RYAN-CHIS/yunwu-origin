@@ -32,6 +32,7 @@ function Navbar() {
   const links = [
     { href: '/', label: '首页' },
     { href: '/series', label: '七序' },
+    { href: '/objects', label: 'Objects' },
     { href: '/products', label: '作品' },
     { href: '/journal', label: '品牌志' },
     { href: '/about', label: '关于允物' },
@@ -64,12 +65,12 @@ function Navbar() {
           ))}
         </div>
 
-        {/* 移动端汉堡菜单 */}
-        <button className="md:hidden text-[var(--yun-ink)]/60 hover:text-[var(--yun-ink)] transition-colors" aria-label="菜单">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M3 12h18M3 6h18M3 18h18" />
-          </svg>
-        </button>
+        <Link
+          href="/objects"
+          className="md:hidden text-xs tracking-[0.15em] text-[var(--yun-ink)]/70 hover:text-[var(--yun-ink)] transition-colors"
+        >
+          Objects
+        </Link>
       </div>
     </nav>
   );

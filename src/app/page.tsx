@@ -101,8 +101,8 @@ export default async function HomePage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="primary" size="lg" href="/products">
-              {hero.ctaPrimary}
+            <Button variant="primary" size="lg" href="/objects">
+              Explore Objects
             </Button>
             <Button variant="ghost" size="lg" href="/series">
               {hero.ctaSecondary}
@@ -129,14 +129,16 @@ export default async function HomePage() {
       </SectionWrapper>
 
       {/* ═══════════════════════════════════════
-          3️⃣ Featured Products（精选作品）
+          3️⃣ Current Release（当下器物）
           ═══════════════════════════════════════ */}
       <SectionWrapper>
         <div className="text-center mb-16 fade-in">
           <h2 className="text-2xl md:text-3xl font-light tracking-[0.15em] text-[var(--yun-ink)] mb-4">
-            精选作品
+            Current Release
           </h2>
           <p className="text-sm text-[var(--yun-gray)] max-w-xl mx-auto leading-loose">
+            Objects now available from the Yunwu Product OS.
+            <br />
             每一件器物，都承载着材料、工艺与时间的温度。
           </p>
         </div>
@@ -161,8 +163,8 @@ export default async function HomePage() {
         )}
 
         <div className="text-center mt-12">
-          <Button variant="ghost" size="md" href="/products">
-            浏览全部作品 →
+          <Button variant="ghost" size="md" href="/objects">
+            Explore Objects →
           </Button>
         </div>
       </SectionWrapper>

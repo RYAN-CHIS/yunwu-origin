@@ -32,8 +32,7 @@ function Navbar() {
   const links = [
     { href: '/', label: '首页' },
     { href: '/series', label: '七序' },
-    { href: '/objects', label: 'Objects' },
-    { href: '/products', label: '作品' },
+    { href: '/objects', label: '器物' },
     { href: '/journal', label: '品牌志' },
     { href: '/about', label: '关于允物' },
     { href: '/contact', label: '同行者' },
@@ -69,7 +68,7 @@ function Navbar() {
           href="/objects"
           className="md:hidden text-xs tracking-[0.15em] text-[var(--yun-ink)]/70 hover:text-[var(--yun-ink)] transition-colors"
         >
-          Objects
+          器物
         </Link>
       </div>
     </nav>

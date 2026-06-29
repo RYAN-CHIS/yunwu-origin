@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import BuyButton from './BuyButton';
 import SectionWrapper from '@/components/ui/SectionWrapper';
+import ProductGallery from '@/components/ui/ProductGallery';
 import { getPublishedProduct, getPublishedProducts } from '@/lib/product-os';
 
 interface Props {
@@ -90,12 +91,11 @@ export default async function ProductDetailPage({ params }: Props) {
 
           {/* 产品布局 */}
           <div className="grid md:grid-cols-2 gap-16">
-            {/* 左：封面 */}
-            <div className="aspect-[3/4] bg-[var(--yun-hover)] rounded-[var(--yun-radius)] flex items-center justify-center">
-              <span className="text-[12rem] leading-none font-display text-[var(--yun-ink)]/5">
-                {product.name.charAt(0)}
-              </span>
-            </div>
+            {/* 左：产品相册 */}
+            <ProductGallery
+              images={[product.coverImage, ...product.gallery].filter(Boolean) as string[]}
+              productName={product.name}
+            />
 
             {/* 右：信息 */}
             <div className="flex flex-col justify-center">

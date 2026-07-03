@@ -144,6 +144,7 @@ export default async function HomePage() {
                 seriesName={product.seriesName}
                 seriesSlug={product.seriesSlug}
                 salePrice={product.salePrice}
+                effectivePrice={product.effectivePrice}
                 objectCategory={product.objectCategory}
               />
             ))}

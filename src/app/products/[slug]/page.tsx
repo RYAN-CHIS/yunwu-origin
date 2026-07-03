@@ -56,9 +56,9 @@ export default async function ProductDetailPage({ params }: Props) {
     sku: product.code || '',
     offers: {
       '@type': 'Offer',
-      price: product.salePrice,
+      price: product.effectivePrice,
       priceCurrency: 'CNY',
-      availability: product.stock > 0
+      availability: product.effectiveInStock
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
     },
@@ -106,13 +106,16 @@ export default async function ProductDetailPage({ params }: Props) {
 
               <div className="space-y-4 mb-10">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-light tracking-wider text-[var(--yun-ink)]">¥{product.salePrice.toLocaleString()}</span>
+                  <span className="text-2xl font-light tracking-wider text-[var(--yun-ink)]">¥{product.effectivePrice.toLocaleString()}</span>
+                  {product.commerceSource === 'erp' && (
+                    <span className="text-xs text-[var(--yun-jade)]/60">ERP</span>
+                  )}
                 </div>
                 <p className="text-xs text-[var(--yun-gray)]">SKU: {product.code}</p>
               </div>
 
               {/* 购买按钮 */}
-              <BuyButton productSlug={product.slug} productName={product.name} price={product.salePrice} />
+              <BuyButton productSlug={product.slug} productName={product.name} price={product.effectivePrice} />
 
               {/* 材料 */}
               {product.materialsRelation.length > 0 && (
@@ -133,8 +136,11 @@ export default async function ProductDetailPage({ params }: Props) {
               )}
 
               {/* 库存 */}
-              {product.stock <= 10 && product.stock > 0 && (
-                <p className="text-xs text-[var(--yun-jade)]/60 mt-4">仅剩 {product.stock} 件</p>
+              {product.effectiveStock <= 10 && product.effectiveStock > 0 && (
+                <p className="text-xs text-[var(--yun-jade)]/60 mt-4">仅剩 {product.effectiveStock} 件</p>
+              )}
+              {product.effectiveStock === 0 && (
+                <p className="text-xs text-red-500/60 mt-4">暂无库存</p>
               )}
             </div>
           </div>
@@ -183,7 +189,7 @@ export default async function ProductDetailPage({ params }: Props) {
                 <h3 className="text-base font-light tracking-wider text-[var(--yun-ink)] mb-1 group-hover:text-[var(--yun-jade)] transition-colors">
                   {p.name}
                 </h3>
-                <p className="text-sm text-[var(--yun-gray)]">¥{p.salePrice.toLocaleString()}</p>
+                <p className="text-sm text-[var(--yun-gray)]">¥{p.effectivePrice.toLocaleString()}</p>
               </Link>
             ))}
           </div>
@@ -193,4 +199,4 @@ export default async function ProductDetailPage({ params }: Props) {
   );
 }
 
-export const revalidate = 3600;
+export const revalidate = 60;

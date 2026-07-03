@@ -8,239 +8,117 @@ datasource db {
   directUrl = env("DIRECT_DATABASE_URL")
 }
 
-// ── 七序（人生状态） ──
 model Series {
-  id          Int       @id @default(autoincrement())
-  slug        String    @unique
-  name        String
-  description String
-  coverImage  String    @default("")
-  heroText    String    @default("")
-  sortOrder   Int       @default(0) @map("sort_order")
-  products    Product[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id           Int       @id @default(autoincrement())
+  slug         String    @unique
+  name         String
+  description  String
+  coverImage   String    @default("")
+  heroText     String    @default("")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  is_active    Boolean   @default(true)
+  long_desc    String?
+  short_desc   String?
+  sortOrder    Int       @default(0) @map("sort_order")
+  status       String?   @default("DRAFT") @db.VarChar(20)
+  published_at DateTime? @db.Timestamptz(6)
+  products     Product[]
 
   @@map("series")
 }
 
-// ── 器物（作品）— V2.2 with Product OS fields ──
 model Product {
-  id               Int              @id @default(autoincrement())
-
-  // V1.x 基础字段
-  sku              String           @unique
-  name             String
-  slug             String           @unique
-  seriesId         Int              @map("series_id")
-  series           Series           @relation(fields: [seriesId], references: [id])
-  objectCategory   ObjectCategory   @default(BRACELET) @map("object_category")
-  theme            String           @default("")
-  story            String           @default("")
-  materials        String           @default("")
-  materialsRelation  ProductMaterial[]
-  costPrice        Float            @default(0)  @map("cost_price")
-  salePrice        Float            @default(0)  @map("sale_price")
-  coverImage       String           @default("") @map("cover_image")
-  gallery          String           @default("[]")
-  stock            Int              @default(0)
-  status           String           @default("draft")
-
-  // ── Product OS V2.2 发布控制 ──
-  publishStatus    PublishStatus    @default(DRAFT) @map("publish_status")
-  publishedAt      DateTime?        @map("published_at")
-  productType      ProductType      @default(STANDARD) @map("product_type")
-
-  // ── V2.2 PDP 字段 ──
-  valueBullets     Json?            @map("value_bullets")
-  originPlace      String?          @map("origin_place")
-  technique        String?
-  finish           String?
-  materialOrigin   String?          @map("material_origin")
-  craftMethod      String?          @map("craft_method")
-  completionDate   DateTime?        @map("completion_date")
-  serialNumber     String?          @map("serial_number")
-  creationStory    String?          @map("creation_story")
-  emotionalState   String?          @map("emotional_state")
-  artisanStory     String?          @map("artisan_story")
-  companionsCount  Int              @default(0) @map("companions_count")
-  remainingQty     Int?             @map("remaining_qty")
-
-  // ── 仪式分类关联 ──
-  ritualTaxonomyId Int?             @map("ritual_taxonomy_id")
-  ritualTaxonomy   RitualTaxonomy?  @relation(fields: [ritualTaxonomyId], references: [id])
-
-  // ── 关联 ──
-  batches            Batch[]
-  quotes             CustomerQuote[]
-  outgoingCrossSells CrossSellRelation[] @relation("FromProduct")
-  incomingCrossSells CrossSellRelation[] @relation("ToProduct")
-
-  createdAt          DateTime       @default(now()) @map("created_at")
-  updatedAt          DateTime       @updatedAt      @map("updated_at")
+  id                Int               @id @default(autoincrement())
+  sku               String            @unique
+  name              String
+  slug              String            @unique
+  seriesId          Int               @map("series_id")
+  objectCategory    ObjectCategory    @default(BRACELET) @map("object_category")
+  theme             String            @default("")
+  story             String            @default("")
+  materials         String            @default("")
+  costPrice         Float             @default(0) @map("cost_price")
+  salePrice         Float             @default(0) @map("sale_price")
+  coverImage        String            @default("") @map("cover_image")
+  gallery           String            @default("[]")
+  stock             Int               @default(0)
+  status            String            @default("draft")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+  inspiration       String?
+  keywords          String?
+  life_stage        String?
+  suitable_for      String?
+  erp_product_id    Int?              @unique
+  sort_order        Int               @default(0)
+  publishedAt       DateTime?         @map("published_at") @db.Timestamptz(6)
+  materialOrigin    String?           @map("material_origin")
+  craftMethod       String?           @map("craft_method")
+  completionDate    DateTime?         @map("completion_date") @db.Timestamp(6)
+  serialNumber      String?           @map("serial_number")
+  creationStory     String?           @map("creation_story")
+  emotionalState    String?           @map("emotional_state")
+  companionsCount   Int               @default(0) @map("companions_count")
+  remainingQty      Int?              @map("remaining_qty")
+  publishStatus     PublishStatus     @default(DRAFT) @map("publish_status")
+  productType       ProductType       @default(STANDARD) @map("product_type")
+  materialsRelation ProductMaterial[]
+  series            Series            @relation(fields: [seriesId], references: [id])
 
   @@index([seriesId])
   @@index([status])
   @@index([objectCategory])
   @@index([publishStatus])
-  @@index([ritualTaxonomyId])
   @@map("products")
 }
 
-// ── 器物分类 ──
-enum ObjectCategory {
-  BRACELET   // 珠串
-  INCENSE    // 香器
-  SEAL       // 印章
-  CERAMIC    // 瓷器
-  ENAMEL     // 珐琅
-  SCHOLAR    // 文房
-}
-
-// ── 发布状态（V2.2 扩展） ──
-enum PublishStatus {
-  DRAFT
-  PENDING_REVIEW
-  APPROVED
-  PUBLISHED
-  UNPUBLISHED
-  ARCHIVED
-}
-
-// ── Product OS 产品类型 ──
-enum ProductType {
-  STANDARD
-  BATCHED
-}
-
-// ── 批次管理（V2.2） ──
-model Batch {
-  id           Int      @id @default(autoincrement())
-  productId    Int      @map("product_id")
-  batchNumber  Int      @map("batch_number")
-  batchCode    String   @unique @map("batch_code")
-  totalQty     Int      @map("total_qty")
-  remainingQty Int      @map("remaining_qty")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  @@unique([productId, batchNumber])
-  @@index([productId])
-  @@map("batches")
-}
-
-// ── 仪式分类（V2.2） ──
-model RitualTaxonomy {
-  id               Int        @id @default(autoincrement())
-  code             String     @unique
-  ritualType       String     @map("ritual_type")
-  symbolicFunction String     @map("symbolic_function")
-  emotionalState   String     @map("emotional_state")
-  dailyContext     String     @map("daily_context")
-  description      String?
-  createdAt        DateTime   @default(now()) @map("created_at")
-  updatedAt        DateTime   @updatedAt @map("updated_at")
-  products         Product[]
-
-  @@map("ritual_taxonomies")
-}
-
-// ── 客户语录（V2.2） ──
-model CustomerQuote {
-  id           Int         @id @default(autoincrement())
-  productId    Int         @map("product_id")
-  customerName String      @map("customer_name")
-  content      String
-  isApproved   Boolean     @default(false) @map("is_approved")
-  sortOrder    Int         @default(0) @map("sort_order")
-  createdAt    DateTime    @default(now()) @map("created_at")
-  updatedAt    DateTime    @updatedAt @map("updated_at")
-  product      Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  @@index([productId, isApproved])
-  @@map("customer_quotes")
-}
-
-// ── 交叉销售关系（V2.2） ──
-model CrossSellRelation {
-  id            Int      @id @default(autoincrement())
-  fromProductId Int      @map("from_product_id")
-  toProductId   Int      @map("to_product_id")
-  reason        String
-  sortOrder     Int      @default(0) @map("sort_order")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
-  fromProduct   Product  @relation("FromProduct", fields: [fromProductId], references: [id], onDelete: Cascade)
-  toProduct     Product  @relation("ToProduct", fields: [toProductId], references: [id], onDelete: Cascade)
-
-  @@unique([fromProductId, toProductId])
-  @@index([fromProductId])
-  @@index([toProductId])
-  @@map("cross_sell_relations")
-}
-
-// ── 审计日志（V2.2） ──
-model JournalEntry {
-  id         Int      @id @default(autoincrement())
-  entityType String   @map("entity_type")
-  entityId   Int      @map("entity_id")
-  action     String
-  summary    String
-  metadata   String?
-  operatorId Int?     @map("operator_id")
-  createdAt  DateTime @default(now()) @map("created_at")
-
-  @@index([entityType, entityId])
-  @@map("journal_entries")
-}
-
-// ── 材料库 ──
 model Material {
-  id          Int       @id @default(autoincrement())
-  name        String    @unique
-  type        String    @default("")
-  origin      String    @default("")
-  description String    @default("")
-  image       String    @default("")
-  productMaterials  ProductMaterial[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id               Int               @id @default(autoincrement())
+  name             String            @unique
+  type             String            @default("")
+  origin           String            @default("")
+  description      String            @default("")
+  image            String            @default("")
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  alias            String?
+  features         String?
+  history          String?
+  related_articles String            @default("[]")
+  productMaterials ProductMaterial[]
 
   @@map("materials")
 }
 
-// ── 作品-材料多对多关联 ──
 model ProductMaterial {
   id         Int      @id @default(autoincrement())
   productId  Int      @map("product_id")
   materialId Int      @map("material_id")
-  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([productId, materialId])
   @@map("product_materials")
 }
 
-// ── 订单 ──
 model Order {
-  id          Int       @id @default(autoincrement())
-  orderNo     String    @unique @map("order_no")
-  productId   Int       @map("product_id")
-  productName String    @default("") @map("product_name")
-  quantity    Int       @default(1)
-  amount      Float
+  id           Int      @id @default(autoincrement())
+  orderNo      String   @unique @map("order_no")
+  productId    Int      @map("product_id")
+  productName  String   @default("") @map("product_name")
+  quantity     Int      @default(1)
+  amount       Float
   customerName String   @default("") @map("customer_name")
-  phone       String    @default("")
-  address     String    @default("")
-  remark      String    @default("")
-  status      String    @default("pending")
-  createdAt   DateTime  @default(now()) @map("created_at")
+  phone        String   @default("")
+  address      String   @default("")
+  remark       String   @default("")
+  status       String   @default("pending")
+  createdAt    DateTime @default(now()) @map("created_at")
 
   @@map("orders")
 }
 
-// ── 品牌志（Journal） ──
 model JournalPost {
   id             String          @id @default(cuid())
   title          String
@@ -255,10 +133,241 @@ model JournalPost {
   publishedAt    DateTime?       @map("published_at")
   createdAt      DateTime        @default(now()) @map("created_at")
   updatedAt      DateTime        @updatedAt @map("updated_at")
+  cover_alt      String?
+  reading_time   Int?
+  sort_order     Int             @default(0)
 
   @@index([status, publishedAt])
   @@index([category])
   @@map("journal_posts")
+}
+
+model ContactLead {
+  id                  String   @id @default(cuid())
+  name                String
+  wechat              String?  @map("wechat")
+  email               String?  @map("email")
+  message             String?
+  createdAt           DateTime @default(now()) @map("created_at")
+  interested_category String?
+  interested_series   String?
+  source_page         String?
+
+  @@index([createdAt])
+  @@map("contact_leads")
+}
+
+model admin_users {
+  id            String    @id
+  email         String    @unique
+  password_hash String
+  name          String
+  role          AdminRole
+  created_at    DateTime  @default(now())
+  updated_at    DateTime
+}
+
+model audit_logs {
+  id          String   @id
+  user_id     String
+  action      String
+  entity_type String
+  entity_id   String?
+  details     String?
+  created_at  DateTime @default(now())
+
+  @@index([created_at])
+  @@index([entity_type, entity_id])
+  @@index([user_id])
+}
+
+model banners {
+  id         Int       @id @default(autoincrement())
+  title      String    @db.VarChar(255)
+  image_url  String?
+  link_url   String?
+  position   String?   @default("home") @db.VarChar(50)
+  sort_order Int?      @default(0)
+  status     String?   @default("DRAFT") @db.VarChar(20)
+  start_at   DateTime? @db.Timestamptz(6)
+  end_at     DateTime? @db.Timestamptz(6)
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+}
+
+model brand_materials {
+  id                  Int       @id @default(autoincrement())
+  name                String    @unique
+  slug                String?   @default("")
+  alias               String?
+  category            String?   @default("")
+  origin              String?   @default("")
+  description         String?   @default("")
+  short_desc          String?   @default("")
+  features            String?
+  story               String?   @default("")
+  applicable_products String?   @default("")
+  status              String?   @default("DRAFT")
+  sort_order          Int?      @default(0)
+  image               String?   @default("")
+  cover_image         String?   @default("")
+  detail_images       String?   @default("[]")
+  seo_title           String?   @default("")
+  seo_description     String?   @default("")
+  seo_keywords        String?   @default("")
+  related_articles    String?   @default("[]")
+  created_at          DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime? @default(now()) @db.Timestamptz(6)
+}
+
+model brand_product_content {
+  id              Int      @id @default(autoincrement())
+  product_id      Int      @unique
+  story           String   @default("")
+  gallery         String   @default("[]")
+  presentation    String   @default("")
+  seo_title       String?  @db.VarChar(255)
+  seo_description String?
+  highlights      String?  @default("[]")
+  created_at      DateTime @default(now()) @db.Timestamp(6)
+  updated_at      DateTime @default(now()) @db.Timestamp(6)
+}
+
+model content_versions {
+  id           String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  content_type String    @db.VarChar(20)
+  content_id   String
+  version      Int       @default(1)
+  snapshot     Json      @default("{}")
+  status       String?   @default("PUBLISHED") @db.VarChar(20)
+  created_by   Int?      @default(1)
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([content_type, content_id, version])
+  @@index([created_at], map: "idx_cv_created")
+  @@index([content_type, content_id], map: "idx_cv_ct_cid")
+}
+
+model journal_tags {
+  id         String @id
+  journal_id String
+  tag_id     String
+
+  @@unique([journal_id, tag_id])
+}
+
+model media {
+  id         String        @id
+  filename   String
+  url        String
+  category   MediaCategory
+  alt_text   String?
+  size       Int
+  mime_type  String
+  created_at DateTime      @default(now())
+}
+
+model page_contents {
+  id          String   @id
+  page_key    String
+  section_key String
+  title       String   @default("")
+  content     String   @default("")
+  image       String?
+  sort_order  Int      @default(0)
+  published   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime
+
+  @@unique([page_key, section_key])
+}
+
+model product_tags {
+  id         String @id
+  product_id Int
+  tag_id     String
+
+  @@unique([product_id, tag_id])
+}
+
+model publish_jobs {
+  id           String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  content_type String    @db.VarChar(20)
+  content_id   String
+  publish_at   DateTime  @db.Timestamptz(6)
+  status       String?   @default("pending") @db.VarChar(20)
+  created_by   Int?      @default(1)
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([content_type, content_id], map: "idx_pj_ct_cid")
+  @@index([status, publish_at], map: "idx_pj_status_pa")
+}
+
+model seo_configs {
+  id          String   @id
+  page_key    String   @unique
+  title       String
+  description String
+  og_image    String?
+  canonical   String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime
+}
+
+model seo_snapshots {
+  id            String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  content_type  String    @db.VarChar(20)
+  content_id    String
+  version       Int       @default(1)
+  title         String    @db.VarChar(255)
+  slug          String    @db.VarChar(255)
+  description   String?
+  keywords      String?
+  og_image      String?
+  canonical_url String?
+  published_at  DateTime  @db.Timestamptz(6)
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([content_type, content_id], map: "idx_ss_ct_cid")
+}
+
+model site_settings {
+  id         String   @id
+  key        String   @unique
+  value      String
+  updated_at DateTime
+}
+
+model tags {
+  id          String   @id
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  type        TagType
+  created_at  DateTime @default(now())
+}
+
+enum ObjectCategory {
+  BRACELET
+  INCENSE
+  SEAL
+  CERAMIC
+  ENAMEL
+  SCHOLAR
+}
+
+enum PublishStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  PUBLISHED
+  UNPUBLISHED
+  ARCHIVED
+}
+
+enum ProductType {
+  STANDARD
+  BATCHED
 }
 
 enum JournalCategory {
@@ -270,15 +379,32 @@ enum JournalCategory {
   PHILOSOPHY
 }
 
-// ── 联系表单线索 ──
-model ContactLead {
-  id        String   @id @default(cuid())
-  name      String
-  wechat    String?  @map("wechat")
-  email     String?  @map("email")
-  message   String?
-  createdAt DateTime @default(now()) @map("created_at")
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
+  OPERATOR
+}
 
-  @@index([createdAt])
-  @@map("contact_leads")
+enum MediaCategory {
+  PRODUCT
+  BEADS
+  SEAL
+  INCENSE
+  PORCELAIN
+  WOODWORK
+  OTHER_OBJ
+  MATERIAL
+  BRAND
+  CRAFT
+  ARTICLE
+}
+
+enum TagType {
+  SERIES
+  VALUE
+  MATERIAL
+  EMOTION
+  SCENE
+  OBJECT
 }

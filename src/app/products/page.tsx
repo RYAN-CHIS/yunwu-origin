@@ -57,6 +57,7 @@ export default async function ProductsPage() {
                   seriesName={p.seriesName}
                   seriesSlug={p.seriesSlug}
                   salePrice={p.salePrice}
+                  effectivePrice={p.effectivePrice}
                   objectCategory={p.objectCategory}
                 />
               ))}
@@ -75,4 +76,4 @@ export default async function ProductsPage() {
   );
 }
 
-export const revalidate = 3600;
+export const revalidate = 60;

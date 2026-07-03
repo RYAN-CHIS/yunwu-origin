@@ -105,6 +105,7 @@ export default async function SeriesPage({ params }: Props) {
                 seriesName={series.name}
                 seriesSlug={series.slug}
                 salePrice={p.salePrice}
+                effectivePrice={p.effectivePrice}
                 objectCategory={p.objectCategory}
               />
             ))}
@@ -127,4 +128,4 @@ export async function generateStaticParams() {
   return series.map((s) => ({ slug: s.slug }));
 }
 
-export const revalidate = 3600;
+export const revalidate = 60;

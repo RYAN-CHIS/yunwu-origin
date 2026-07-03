@@ -8,6 +8,7 @@ interface ProductCardProps {
   seriesName?: string | null;
   seriesSlug?: string | null;
   salePrice: number;
+  effectivePrice?: number; // P0-6B: ERP truth source when linked
   objectCategory?: string | null;
   className?: string;
 }
@@ -19,9 +20,13 @@ export default function ProductCard({
   seriesName,
   seriesSlug,
   salePrice,
+  effectivePrice,
   objectCategory,
   className = '',
 }: ProductCardProps) {
+  // P0-6B: Use effectivePrice when available (ERP truth), otherwise fallback to salePrice
+  const displayPrice = effectivePrice ?? salePrice;
+
   return (
     <Link
       href={`/products/${slug}`}
@@ -69,7 +74,7 @@ export default function ProductCard({
         </h3>
 
         <p className="text-sm text-[var(--yun-gray)] font-sans">
-          ¥{salePrice.toLocaleString()}
+          ¥{displayPrice.toLocaleString()}
         </p>
       </div>
     </Link>

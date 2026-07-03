@@ -3,8 +3,12 @@
  *
  * Public URLs use Product.slug. Internal product identity stays in Product.sku
  * and is exposed as code in the view model.
+ *
+ * P0-6B: When Product.erp_product_id is set, effective price/stock
+ * are read from ERP (source of truth for commerce fields).
  */
 import prisma from '@/lib/prisma';
+import { erpPrisma, fetchErpCommerceFields } from '@/lib/erp-prisma';
 import type { Prisma } from '@prisma/client';
 
 export type ProductOrderBy = Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[];
@@ -38,6 +42,13 @@ export interface ProductSku {
       origin: string;
     };
   }>;
+  // P0-6B: ERP link field
+  erpProductId: number | null;
+  // P0-6B: Effective commerce fields (read from ERP when linked)
+  effectivePrice: number;
+  effectiveStock: number;
+  effectiveInStock: boolean;
+  commerceSource: 'erp' | 'web';
 }
 
 export interface ProductQueryOptions {
@@ -77,6 +88,8 @@ const PRODUCT_SELECT = {
   status: true,
   createdAt: true,
   updatedAt: true,
+  // P0-6B: ERP link field
+  erp_product_id: true,
 } as const;
 
 export async function getPublishedProducts(options?: ProductQueryOptions): Promise<ProductSku[]> {
@@ -105,7 +118,8 @@ export async function getPublishedProducts(options?: ProductQueryOptions): Promi
     ...(options?.take ? { take: options.take } : {}),
   });
 
-  return products.map(toProductSku);
+  const productSkus = products.map(toProductSku);
+  return enrichProductsWithErpCommerce(productSkus);
 }
 
 export async function getPublishedProduct(slug: string): Promise<ProductSku | null> {
@@ -123,7 +137,10 @@ export async function getPublishedProduct(slug: string): Promise<ProductSku | nu
     },
   });
 
-  return product ? toProductSku(product) : null;
+  if (!product) return null;
+
+  const productSku = toProductSku(product);
+  return enrichWithErpCommerce(productSku);
 }
 
 function parseGallery(value: string | null | undefined): string[] {
@@ -136,6 +153,16 @@ function parseGallery(value: string | null | undefined): string[] {
 }
 
 function toProductSku(product: any): ProductSku {
+  const basePrice = product.salePrice || 0;
+  const baseStock = product.stock || 0;
+  const erpProductId = product.erp_product_id || null;
+
+  // P0-6B: Default to web values; will be overwritten if ERP link exists
+  const effectivePrice = basePrice;
+  const effectiveStock = baseStock;
+  const effectiveInStock = baseStock > 0;
+  const commerceSource: 'erp' | 'web' = 'web';
+
   return {
     id: product.id,
     code: product.code ?? product.sku ?? '',
@@ -150,10 +177,76 @@ function toProductSku(product: any): ProductSku {
     materials: product.materials || '',
     coverImage: product.coverImage || null,
     gallery: parseGallery(product.gallery),
-    salePrice: product.salePrice,
-    stock: product.stock,
+    salePrice: basePrice,
+    stock: baseStock,
     publishStatus: product.status,
     updatedAt: product.updatedAt,
     materialsRelation: product.materialsRelation || [],
+    // P0-6B: ERP link & effective commerce fields
+    erpProductId,
+    effectivePrice,
+    effectiveStock,
+    effectiveInStock,
+    commerceSource,
   };
+}
+
+/**
+ * P0-6B: Enrich a product with ERP commerce truth.
+ *
+ * When Product.erp_product_id is set, reads price & finishedStock
+ * from ERP ProductSku (source of truth for commerce).
+ *
+ * Returns the same product with effective fields updated.
+ * If ERP is unavailable or product not linked, returns product unchanged.
+ */
+export async function enrichWithErpCommerce(product: ProductSku): Promise<ProductSku> {
+  if (!product.erpProductId) {
+    return product; // No ERP link — use web values
+  }
+
+  const erpData = await fetchErpCommerceFields(product.erpProductId);
+
+  if (!erpData) {
+    return product; // ERP read failed — fallback to web values
+  }
+
+  return {
+    ...product,
+    effectivePrice: erpData.price,
+    effectiveStock: erpData.finishedStock,
+    effectiveInStock: erpData.finishedStock > 0,
+    commerceSource: 'erp',
+  };
+}
+
+/**
+ * P0-6B: Batch enrich products with ERP commerce truth.
+ * Fetches ERP data for all linked products in parallel.
+ */
+export async function enrichProductsWithErpCommerce(products: ProductSku[]): Promise<ProductSku[]> {
+  const linked = products.filter(p => p.erpProductId);
+  if (linked.length === 0) {
+    return products; // No ERP links — return as-is
+  }
+
+  // Fetch ERP data for all linked products in parallel
+  const erpResults = await Promise.all(
+    linked.map(p => fetchErpCommerceFields(p.erpProductId!).then(data => ({ id: p.id, data })))
+  );
+
+  // Apply ERP data to products
+  const erpMap = new Map(erpResults.filter(r => r.data).map(r => [r.id, r.data]));
+  return products.map(p => {
+    const erpData = erpMap.get(p.id);
+    if (!erpData) return p;
+
+    return {
+      ...p,
+      effectivePrice: erpData.price,
+      effectiveStock: erpData.finishedStock,
+      effectiveInStock: erpData.finishedStock > 0,
+      commerceSource: 'erp' as const,
+    };
+  });
 }

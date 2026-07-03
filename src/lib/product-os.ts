@@ -5,7 +5,7 @@
  * and is exposed as code in the view model.
  *
  * P0-6B: When Product.erp_product_id is set, effective price/stock
- * are read from ERP (source of truth for commerce fields).
+ * are read from ERP product-linked SKU rows (source of truth for commerce fields).
  */
 import prisma from '@/lib/prisma';
 import { erpPrisma, fetchErpCommerceFields } from '@/lib/erp-prisma';
@@ -195,7 +195,7 @@ function toProductSku(product: any): ProductSku {
  * P0-6B: Enrich a product with ERP commerce truth.
  *
  * When Product.erp_product_id is set, reads price & finishedStock
- * from ERP ProductSku (source of truth for commerce).
+ * from the ERP product's latest SKU row (source of truth for commerce).
  *
  * Returns the same product with effective fields updated.
  * If ERP is unavailable or product not linked, returns product unchanged.

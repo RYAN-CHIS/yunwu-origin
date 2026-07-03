@@ -1,5 +1,5 @@
 /**
- * ERP Database Client — read-only access to ERP ProductSku.price & finishedStock.
+ * ERP Database Client — read-only access to ERP SKU commerce fields.
  *
  * P0-6B: Storefront reads commerce truth from ERP when erp_product_id is set.
  *
@@ -61,12 +61,13 @@ export async function fetchErpCommerceFields(erpProductId: number): Promise<{
   }
 
   try {
-    // ERP ProductSku table is named "product_skus"
-    // erp_product_id in storefront links to product_skus.id in ERP
+    // erp_product_id is the ERP product id.
+    // Read the newest SKU for that product so price/stock reflect the live commerce row.
     const result = await erpPrisma.$queryRaw<Array<{ price: number; finishedStock: number }>>`
       SELECT price, finished_stock as "finishedStock"
       FROM product_skus
-      WHERE id = ${erpProductId}
+      WHERE product_id = ${erpProductId}
+      ORDER BY updated_at DESC, id DESC
       LIMIT 1
     `;
 

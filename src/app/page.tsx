@@ -2,6 +2,7 @@ import Link from 'next/link';
 import prisma from '@/lib/prisma';
 import { getPublishedProducts } from '@/lib/product-os';
 import { Button, ProductCard, ContentCard, SectionWrapper } from '@/components/ui';
+import BannerSection from '@/components/BannerSection';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { Metadata } from 'next';
@@ -11,6 +12,9 @@ import { getSeoConfig, toMetadata } from '@/lib/seo';
 export async function generateMetadata(): Promise<Metadata> {
   return toMetadata(await getSeoConfig('home'));
 }
+
+// 首页消费后台已发布 Banner，需每次请求实时读取数据库，禁用静态快照
+export const dynamic = "force-dynamic";
 
 // ── 读取站点配置 ──
 async function getSiteSettings() {
@@ -98,6 +102,11 @@ export default async function HomePage() {
           </div>
         </div>
       </SectionWrapper>
+
+      {/* ═══════════════════════════════════════
+          1.5️⃣ Banner 展示位（后台统一管理 · placement=home）
+          ═══════════════════════════════════════ */}
+      <BannerSection placement="home" />
 
       {/* ═══════════════════════════════════════
           2️⃣ Brand Narrative（品牌叙事）

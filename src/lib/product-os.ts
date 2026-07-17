@@ -9,11 +9,10 @@
  */
 import prisma from '@/lib/prisma';
 import { erpPrisma, fetchErpCommerceFields } from '@/lib/erp-prisma';
-import type { Prisma } from '@prisma/client';
+import { PublishStatus, type Prisma } from '@prisma/client';
+import { getPublicProductWhere, warnPublishStatusMismatch } from '@/lib/product-os-config';
 
 export type ProductOrderBy = Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[];
-
-const PUBLISHED_STATUS = 'PUBLISHED';
 
 export interface ProductSku {
   id: number;
@@ -31,7 +30,8 @@ export interface ProductSku {
   gallery: string[];
   salePrice: number;
   stock: number;
-  publishStatus: string;
+  status: string;
+  publishStatus: PublishStatus;
   updatedAt: Date;
   materialsRelation: Array<{
     id: number;
@@ -86,14 +86,19 @@ const PRODUCT_SELECT = {
   gallery: true,
   stock: true,
   status: true,
+  publishStatus: true,
   createdAt: true,
   updatedAt: true,
   // P0-6B: ERP link field
   erp_product_id: true,
 } as const;
 
+function isDatabaseAuthError(error: unknown) {
+  return error instanceof Error && /Authentication failed against database server/i.test(error.message);
+}
+
 export async function getPublishedProducts(options?: ProductQueryOptions): Promise<ProductSku[]> {
-  const where: Prisma.ProductWhereInput = { status: PUBLISHED_STATUS };
+  const where: Prisma.ProductWhereInput = getPublicProductWhere();
 
   if (options?.category) {
     where.objectCategory = options.category as any;
@@ -108,38 +113,58 @@ export async function getPublishedProducts(options?: ProductQueryOptions): Promi
       ? { createdAt: 'desc' }
       : [{ series: { sortOrder: 'asc' } }, { salePrice: 'asc' }];
 
-  const products = await prisma.product.findMany({
-    where,
-    select: {
-      ...PRODUCT_SELECT,
-      series: { select: { id: true, name: true, slug: true, sortOrder: true } },
-    },
-    orderBy,
-    ...(options?.take ? { take: options.take } : {}),
-  });
+  let products;
+  try {
+    products = await prisma.product.findMany({
+      where,
+      select: {
+        ...PRODUCT_SELECT,
+        series: { select: { id: true, name: true, slug: true, sortOrder: true } },
+      },
+      orderBy,
+      ...(options?.take ? { take: options.take } : {}),
+    });
+  } catch (error) {
+    if (isDatabaseAuthError(error)) {
+      console.warn('[ProductOS][BuildFallback] Returning no products because the database is unavailable during build.');
+      return [];
+    }
+    throw error;
+  }
 
   const productSkus = products.map(toProductSku);
+  for (const product of productSkus) warnPublishStatusMismatch(product);
   return enrichProductsWithErpCommerce(productSkus);
 }
 
 export async function getPublishedProduct(slug: string): Promise<ProductSku | null> {
-  const product = await prisma.product.findFirst({
-    where: { slug, status: PUBLISHED_STATUS },
-    select: {
-      ...PRODUCT_SELECT,
-      series: { select: { id: true, name: true, slug: true, sortOrder: true } },
-      materialsRelation: {
-        select: {
-          id: true,
-          material: { select: { id: true, name: true, type: true, origin: true } },
+  let product;
+  try {
+    product = await prisma.product.findFirst({
+      where: { slug, ...getPublicProductWhere() },
+      select: {
+        ...PRODUCT_SELECT,
+        series: { select: { id: true, name: true, slug: true, sortOrder: true } },
+        materialsRelation: {
+          select: {
+            id: true,
+            material: { select: { id: true, name: true, type: true, origin: true } },
+          },
         },
       },
-    },
-  });
+    });
+  } catch (error) {
+    if (isDatabaseAuthError(error)) {
+      console.warn(`[ProductOS][BuildFallback] Product "${slug}" unavailable because the database is unavailable during build.`);
+      return null;
+    }
+    throw error;
+  }
 
   if (!product) return null;
 
   const productSku = toProductSku(product);
+  warnPublishStatusMismatch(productSku);
   return enrichWithErpCommerce(productSku);
 }
 
@@ -179,7 +204,8 @@ function toProductSku(product: any): ProductSku {
     gallery: parseGallery(product.gallery),
     salePrice: basePrice,
     stock: baseStock,
-    publishStatus: product.status,
+    status: product.status || '',
+    publishStatus: product.publishStatus || PublishStatus.DRAFT,
     updatedAt: product.updatedAt,
     materialsRelation: product.materialsRelation || [],
     // P0-6B: ERP link & effective commerce fields

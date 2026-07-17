@@ -169,10 +169,15 @@ export default async function JournalPostPage({ params }: Props) {
 }
 
 export async function generateStaticParams() {
-  const posts = await prisma.journalPost.findMany({
-    where: { status: 'PUBLISHED' },
-    select: { slug: true },
-  })
+  try {
+    const posts = await prisma.journalPost.findMany({
+      where: { status: 'PUBLISHED' },
+      select: { slug: true },
+    })
 
-  return posts.map((post) => ({ slug: post.slug }))
+    return posts.map((post) => ({ slug: post.slug }))
+  } catch (error) {
+    console.warn('[JournalPage][generateStaticParams] Falling back to no prebuilt params:', error instanceof Error ? error.message : error)
+    return []
+  }
 }

@@ -4,6 +4,8 @@ import { ContentCard } from '@/components/ui';
 import SectionWrapper from '@/components/ui/SectionWrapper';
 import { getSeoConfig, toMetadata } from '@/lib/seo';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   return toMetadata(await getSeoConfig('journal'));
 }

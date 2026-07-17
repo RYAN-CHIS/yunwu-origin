@@ -2,6 +2,8 @@ import Link from 'next/link';
 import prisma from '@/lib/prisma';
 import SectionWrapper from '@/components/ui/SectionWrapper';
 
+export const dynamic = 'force-dynamic';
+
 // ── 七序数据映射（来自《允物品牌宪章》第七篇）──
 const seriesConstitution: Record<string, {
   subtitle: string;

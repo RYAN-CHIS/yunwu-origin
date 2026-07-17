@@ -2,6 +2,8 @@ import Link from 'next/link';
 import prisma from '@/lib/prisma';
 import SectionWrapper from '@/components/ui/SectionWrapper';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: '东方材料｜允物 Yunwu Origin',
   description: '探索允物使用的天然材质：白水晶、粉晶、南红、沉香、老山檀、绿松石、青金石。每一种材料都有它的来历和故事。',

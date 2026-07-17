@@ -1,6 +1,8 @@
 import { db } from '@/lib/db'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminJournalPage() {
   const posts = await db.journalPost.findMany({
     orderBy: { createdAt: 'desc' },

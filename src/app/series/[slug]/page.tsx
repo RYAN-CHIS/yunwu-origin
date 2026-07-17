@@ -124,8 +124,13 @@ export default async function SeriesPage({ params }: Props) {
 }
 
 export async function generateStaticParams() {
-  const series = await prisma.series.findMany({ select: { slug: true } });
-  return series.map((s) => ({ slug: s.slug }));
+  try {
+    const series = await prisma.series.findMany({ select: { slug: true } });
+    return series.map((s) => ({ slug: s.slug }));
+  } catch (error) {
+    console.warn('[SeriesPage][generateStaticParams] Falling back to no prebuilt params:', error instanceof Error ? error.message : error);
+    return [];
+  }
 }
 
 export const revalidate = 60;

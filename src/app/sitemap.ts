@@ -17,36 +17,51 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // Dynamic product pages — via Product OS
-  const products = await getPublishedProducts();
-  const productPages = products.map((p) => ({
-    url: `${baseUrl}/products/${p.slug}`,
-    lastModified: p.updatedAt,
-    changeFrequency: 'weekly' as const,
-    priority: 0.7,
-  }));
+  let productPages: MetadataRoute.Sitemap = [];
+  try {
+    const products = await getPublishedProducts();
+    productPages = products.map((p) => ({
+      url: `${baseUrl}/products/${p.slug}`,
+      lastModified: p.updatedAt,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    }));
+  } catch (error) {
+    console.warn('[Sitemap][BuildFallback] Skipping product pages because Product OS is unavailable during build.', error instanceof Error ? error.message : error);
+  }
 
   // Dynamic series pages
-  const series = await prisma.series.findMany({
-    select: { slug: true, updatedAt: true },
-  });
-  const seriesPages = series.map((s) => ({
-    url: `${baseUrl}/series/${s.slug}`,
-    lastModified: s.updatedAt,
-    changeFrequency: 'weekly' as const,
-    priority: 0.6,
-  }));
+  let seriesPages: MetadataRoute.Sitemap = [];
+  try {
+    const series = await prisma.series.findMany({
+      select: { slug: true, updatedAt: true },
+    });
+    seriesPages = series.map((s) => ({
+      url: `${baseUrl}/series/${s.slug}`,
+      lastModified: s.updatedAt,
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    }));
+  } catch (error) {
+    console.warn('[Sitemap][BuildFallback] Skipping series pages because the database is unavailable during build.', error instanceof Error ? error.message : error);
+  }
 
   // Dynamic journal pages
-  const posts = await prisma.journalPost.findMany({
-    where: { status: 'PUBLISHED' },
-    select: { slug: true, updatedAt: true },
-  });
-  const postPages = posts.map((p) => ({
-    url: `${baseUrl}/journal/${p.slug}`,
-    lastModified: p.updatedAt,
-    changeFrequency: 'monthly' as const,
-    priority: 0.5,
-  }));
+  let postPages: MetadataRoute.Sitemap = [];
+  try {
+    const posts = await prisma.journalPost.findMany({
+      where: { status: 'PUBLISHED' },
+      select: { slug: true, updatedAt: true },
+    });
+    postPages = posts.map((p) => ({
+      url: `${baseUrl}/journal/${p.slug}`,
+      lastModified: p.updatedAt,
+      changeFrequency: 'monthly' as const,
+      priority: 0.5,
+    }));
+  } catch (error) {
+    console.warn('[Sitemap][BuildFallback] Skipping journal pages because the database is unavailable during build.', error instanceof Error ? error.message : error);
+  }
 
   return [...staticPages, ...productPages, ...seriesPages, ...postPages];
 }

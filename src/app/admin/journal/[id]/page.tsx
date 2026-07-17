@@ -2,6 +2,8 @@ import { db } from '@/lib/db'
 import { redirect, notFound } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 
+export const dynamic = 'force-dynamic'
+
 const categories = [
   { value: 'OBJECT',     label: '器物' },
   { value: 'MATERIAL',   label: '材料' },

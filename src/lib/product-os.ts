@@ -8,12 +8,11 @@
  * are read from ERP product-linked SKU rows (source of truth for commerce fields).
  */
 import prisma from '@/lib/prisma';
-import { erpPrisma, fetchErpCommerceFields } from '@/lib/erp-prisma';
-import type { Prisma } from '@prisma/client';
+import { fetchErpCommerceFields } from '@/lib/erp-prisma';
+import { PublishStatus, type ObjectCategory, type Prisma } from '@prisma/client';
+import { getPublicProductWhere } from '@/lib/product-os-config';
 
 export type ProductOrderBy = Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[];
-
-const PUBLISHED_STATUS = 'PUBLISHED';
 
 export interface ProductSku {
   id: number;
@@ -31,7 +30,8 @@ export interface ProductSku {
   gallery: string[];
   salePrice: number;
   stock: number;
-  publishStatus: string;
+  status: string;
+  publishStatus: PublishStatus;
   updatedAt: Date;
   materialsRelation: Array<{
     id: number;
@@ -67,9 +67,30 @@ export interface ProductQueryOptions {
   orderBy?: 'default' | 'newest';
 }
 
-// Fields that exist in the current production database.
-// V2.2-only fields (publishStatus, productType, valueBullets, etc.) are excluded
-// until the database migration is completed.
+type ProductSkuSource = {
+  id: number;
+  code?: string | null;
+  sku: string;
+  slug: string;
+  name: string;
+  seriesId: number;
+  objectCategory: ObjectCategory;
+  theme: string;
+  story: string;
+  materials: string;
+  coverImage: string;
+  gallery: string;
+  salePrice: number;
+  stock: number;
+  status: string;
+  publishStatus: PublishStatus;
+  updatedAt: Date;
+  erp_product_id: number | null;
+  series?: { name: string; slug: string } | null;
+  materialsRelation?: ProductSku['materialsRelation'];
+};
+
+// Shared Product fields for public list and detail queries.
 const PRODUCT_SELECT = {
   id: true,
   sku: true,
@@ -86,6 +107,7 @@ const PRODUCT_SELECT = {
   gallery: true,
   stock: true,
   status: true,
+  publishStatus: true,
   createdAt: true,
   updatedAt: true,
   // P0-6B: ERP link field
@@ -93,10 +115,10 @@ const PRODUCT_SELECT = {
 } as const;
 
 export async function getPublishedProducts(options?: ProductQueryOptions): Promise<ProductSku[]> {
-  const where: Prisma.ProductWhereInput = { status: PUBLISHED_STATUS };
+  const where: Prisma.ProductWhereInput = getPublicProductWhere();
 
   if (options?.category) {
-    where.objectCategory = options.category as any;
+    where.objectCategory = options.category as ObjectCategory;
   }
 
   if (options?.seriesSlug) {
@@ -124,7 +146,7 @@ export async function getPublishedProducts(options?: ProductQueryOptions): Promi
 
 export async function getPublishedProduct(slug: string): Promise<ProductSku | null> {
   const product = await prisma.product.findFirst({
-    where: { slug, status: PUBLISHED_STATUS },
+    where: { slug, ...getPublicProductWhere() },
     select: {
       ...PRODUCT_SELECT,
       series: { select: { id: true, name: true, slug: true, sortOrder: true } },
@@ -152,7 +174,7 @@ function parseGallery(value: string | null | undefined): string[] {
   }
 }
 
-function toProductSku(product: any): ProductSku {
+function toProductSku(product: ProductSkuSource): ProductSku {
   const basePrice = product.salePrice || 0;
   const baseStock = product.stock || 0;
   const erpProductId = product.erp_product_id || null;
@@ -179,7 +201,8 @@ function toProductSku(product: any): ProductSku {
     gallery: parseGallery(product.gallery),
     salePrice: basePrice,
     stock: baseStock,
-    publishStatus: product.status,
+    status: product.status || '',
+    publishStatus: product.publishStatus || PublishStatus.DRAFT,
     updatedAt: product.updatedAt,
     materialsRelation: product.materialsRelation || [],
     // P0-6B: ERP link & effective commerce fields
